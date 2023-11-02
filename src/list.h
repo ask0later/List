@@ -8,8 +8,9 @@
 typedef int Elem_t;
 const int    POISON_COUNTER  =      -1;
 const int    POISON          = INT_MAX;
-const size_t NUM_NODES       =       5;
+const size_t NUM_NODES       =      10;
 const size_t FICT_ELEM       =       1;
+const size_t MAX_SIZE_LIST   =     101;
 
 struct Node
 {
@@ -21,16 +22,28 @@ struct Node
 struct Info
 {
     Node* nodes;
-    int free;
     size_t num_elem;
+    int free;
+    int errors;
 };
 
 
-void    DumpList(Info* list);
+void       TextDumpList(Info* list);
+void    GraphicDumpList(Info* list);
+void CreateGraphicNodes(Info* list);
+void CreateGraphicLinks(Info* list);
+
+
 void Constructor(Info* list);
 void  Destructor(Info* list);
-void  ListInsert(Info* list, int position, Elem_t value);
-void   ListErase(Info* list, int position              ); 
+int   ListInsert(Info* list, int position, Elem_t value);
+int    ListErase(Info* list, int position              ); 
+
+int       DumpErrors(Info* list);
+int       FindErrors(Info* list);
+void     CheckMemory(Info* list);
+void IncreaseRealloc(Info* list);
+void   ReduceRealloc(Info* list);
 
 
 
