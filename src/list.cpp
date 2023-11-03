@@ -180,18 +180,18 @@ void TextDumpList(Info* list)
     
     printf(GREEN_COLOR  "\nInformation about this list\n");
     
-    printf(BLUE_COLOR   "Head of list(next[0]) = %2d.\n"
-                        "Tail of list[prev[0]] = %2d.\n",\
+    printf(BLUE_COLOR   "Head of list(next[0]) = %3d.\n"
+                        "Tail of list[prev[0]] = %3d.\n",\
                         list->nodes[0].next,\
                         list->nodes[0].prev);
 
-    printf(YELLOW_COLOR "First free element = %2d.\n", list->free);
+    printf(YELLOW_COLOR "First free element = %3d.\n", list->free);
     printf("______________________________________\n");
     
     printf(BOLD_RED_COLOR "INDX ");
     for (size_t counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
     {
-        printf("%2lu ", counter);
+        printf("%3lu ", counter);
     }
     printf("\n");
 
@@ -199,13 +199,13 @@ void TextDumpList(Info* list)
     for (size_t counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
     {
         if (counter == 0)
-            printf(RED_COLOR "ЯД ");
+            printf(RED_COLOR " ЯД ");
         else if ((list->nodes[counter].data == POISON) && (list->nodes[counter].prev == -1))
-            printf(YELLOW_COLOR "ЯД ");
+            printf(YELLOW_COLOR " ЯД ");
         else if (list->nodes[counter].data == POISON)
-            printf(GREEN_COLOR "ЯД ");
+            printf(GREEN_COLOR " ЯД ");
         else
-            printf(GREEN_COLOR "%2d ",list->nodes[counter].data);
+            printf(GREEN_COLOR "%3d ",list->nodes[counter].data);
     }
     printf("\n");
     
@@ -213,22 +213,22 @@ void TextDumpList(Info* list)
     for (size_t counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
     {
         if (counter == 0)
-            printf(RED_COLOR "%2d ", list->nodes[counter].next);
+            printf(RED_COLOR "%3d ", list->nodes[counter].next);
         else if (list->nodes[counter].prev == -1)
-            printf(YELLOW_COLOR "%2d ", list->nodes[counter].next);
+            printf(YELLOW_COLOR "%3d ", list->nodes[counter].next);
         else
-            printf(GREEN_COLOR "%2d ",list->nodes[counter].next);
+            printf(GREEN_COLOR "%3d ",list->nodes[counter].next);
     }
     printf("\n");
     printf(BOLD_RED_COLOR "PREV ");
     for (size_t counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
     {
         if (counter == 0)
-            printf(RED_COLOR "%2d ", list->nodes[counter].prev);
+            printf(RED_COLOR "%3d ", list->nodes[counter].prev);
         else if (list->nodes[counter].prev == -1)
-            printf(YELLOW_COLOR "%2d ", list->nodes[counter].prev);
+            printf(YELLOW_COLOR "%3d ", list->nodes[counter].prev);
         else
-            printf(GREEN_COLOR "%2d ",list->nodes[counter].prev);
+            printf(GREEN_COLOR "%3d ",list->nodes[counter].prev);
     }
     printf("\n");
     printf(YELLOW_COLOR "______________________________________\n");
@@ -318,11 +318,11 @@ void ReduceRealloc(Info* list)
         if (counter == counter_full - 1)
             list->nodes[counter].next = 0;
         else
-            list->nodes[counter].next = counter + 1;
+            list->nodes[counter].next = (int) (counter + 1);
         if (counter == 0)
-            list->nodes[counter].prev = counter_full - 1;
+            list->nodes[counter].prev = (int) (counter_full - 1);
         else 
-            list->nodes[counter].prev = counter - 1;
+            list->nodes[counter].prev = (int) (counter - 1);
     }
     list->free = (int) counter_full;
     for (counter = counter_full; counter < list->num_elem + FICT_ELEM; counter++)
@@ -370,4 +370,56 @@ int DumpErrors(Info* list)
     }
 
     return list->errors;
+}
+
+
+int push_back(Info* list, Elem_t value)
+{
+    int position = 0;
+    
+    return ListInsert(list, position, value);
+}
+
+int push_front(Info* list, Elem_t value)
+{
+    int position = list->nodes[0].next;
+    
+    return ListInsert(list, position, value);
+}
+int pop_back(Info* list)
+{
+    int position = list->nodes[0].prev;
+    
+    return ListErase(list, position);;
+}
+
+int pop_front(Info* list)
+{
+    int position = list->nodes[0].next;
+    
+    return ListErase(list, position);
+}
+
+int begin(Info* list)
+{
+    return (list->nodes[0].next);
+}
+
+int   end(Info* list)
+{
+    //list->nodes[0].prev;
+    return (0);
+}
+
+
+int GetValueList(Info* list, int position)
+{
+    int return_value = list->nodes[position].data;
+    return return_value;
+}
+
+int SetValueList(Info* list, Elem_t value, int position)
+{
+    list->nodes[position].data = value;
+    return position;
 }

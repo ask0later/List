@@ -46,5 +46,20 @@ void IncreaseRealloc(Info* list);
 void   ReduceRealloc(Info* list);
 
 
+int push_back (Info* list, Elem_t value);
+int push_front(Info* list, Elem_t value);
+int  pop_back (Info* list);
+int  pop_front(Info* list);
+
+int begin(Info* list);
+int   end(Info* list);
+
+int GetValueList(Info* list, int position);
+int SetValueList(Info* list, Elem_t value, int position);
+
+
+
 
 #endif
+
+

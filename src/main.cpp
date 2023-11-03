@@ -153,6 +153,13 @@ int main()
     }
     TextDumpList(&list);
 
+    for (int it = begin(&list), ite = end(&list); it != ite; it = list.nodes[it].next) 
+    {
+        SetValueList(&list, GetValueList(&list, it) * 2,  it);
+    }
+   
+    TextDumpList(&list);
+
     // ListErase(&list, 6);
     // if (list.errors != 0)
     // {
