@@ -170,8 +170,8 @@ int main()
     //     return 1;
     // }
     // TextDumpList(&list);
-
-    //GraphicDumpList(&list);
+    
+    GraphicDumpList(&list);
 
     Destructor(&list);
 }

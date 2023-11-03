@@ -37,7 +37,7 @@ void Destructor(Info* list)
     
     free(list->nodes);
 }
-
+ 
 int ListInsert(Info* list, int position, Elem_t value)
 {
     assert(list);
@@ -47,11 +47,11 @@ int ListInsert(Info* list, int position, Elem_t value)
     // if (prev[position] == -1) error!!!
     // if (position == 0)        value enter in end
 
-    if (list->nodes[position].prev == -1)
-    {
+    if (list->nodes[position].prev == POISON_COUNTER)
         list->errors = 1 << 4;
-    }
-    list->errors += FindErrors(list);
+    if (list->errors == 0)
+        list->errors = FindErrors(list);
+    
     if (list->errors != 0)
         return -1;
 
@@ -83,10 +83,14 @@ int ListErase(Info* list, int position)
 
     if (list->nodes[position].prev == POISON_COUNTER)
         list->errors = 1 << 4;
-    list->errors += FindErrors(list);
+    if (list->errors == 0)
+        list->errors = FindErrors(list);
+
     if (list->errors != 0)
         return -1;
     CheckMemory(list);
+    TextDumpList(list);
+
     
     int return_value = list->nodes[position].next;
     list->nodes[list->nodes[position].prev].next = list->nodes[position].next;   // next[prev[position]] = next[position];
@@ -104,14 +108,10 @@ int ListErase(Info* list, int position)
 
 void GraphicDumpList(Info* list)
 {
-    dtBegin(GRAPH_DOT); // Начало dot-описания графа
-    dtNodeStyle().color("#000000"); // Устанавливаем стиль узлов
-    // dtLinkStyle ("dashed"); // Устанавливаем стиль связей
+    dtBegin(GRAPH_DOT);             // Начало dot-описания графа
 
-    CreateGraphicNodes(list);
-    CreateGraphicLinks(list);
-
-    // dtLinkStyle ("bold", "red"); // Другой стиль связи
+    CreateGraphicNodes(list);       // Создаем узлы
+    CreateGraphicLinks(list);       // Создаем связи
 
     dtEnd(); // Конец dot-описания графа
 
@@ -121,15 +121,14 @@ void CreateGraphicNodes(Info* list)
 {
     assert(list);
 
-    //dtNodeStyle("box");
-
-    // dtNodeStyle().shape("box");
-    // dtNodeStyle().style("bold");
+    dtNodeStyle ().shape            ("box"); // Устанавливаем стиль узлов
+    dtNodeStyle ().style         ("filled");
+    dtNodeStyle ().fontcolor      ("black");
 
     char str[80] = {};
     for (int counter = 0; counter < (int) list->num_elem; counter++)
     {
-        if (list->nodes[counter].prev == POISON_COUNTER)
+        if ((list->nodes[counter].prev == POISON_COUNTER) || (counter == 0)) 
         {
             sprintf(str, "INDX = %2d\n"
                          "DATA = ЯД\n"
@@ -143,23 +142,14 @@ void CreateGraphicNodes(Info* list)
                          "NEXT = %2d\n"
                          "PREV = %2d", counter, list->nodes[(size_t) counter].data, list->nodes[(size_t) counter].next, list->nodes[(size_t) counter].prev);
         }
-        //dtNodeStyle().fillcolor("#7BF2DA");
-        if (list->nodes[(size_t) counter].prev == POISON_COUNTER)
-        {
-            dtNodeStyle().fillcolor("#F8D568");//HEX_YELLOW
-        }
+        if (list->nodes[(size_t) counter].prev == POISON_COUNTER)     // Устанавливаем цвет узлов
+            dtNodeStyle().fillcolor("#F8D568");//HEX_YELLOW       
         else if (counter == 0)
-        {
             dtNodeStyle().fillcolor("#EE204D");//HEX_RED
-        }
         else if ((counter == list->nodes[0].prev) || (counter == list->nodes[0].next))
-        {
             dtNodeStyle().fillcolor("#7BF2DA");//HEX_TIFFANY
-        }
         else 
-        {
             dtNodeStyle().fillcolor("#21C912");//HEX_GREEN
-        }
 
         dtNode(counter, str);
     }
@@ -168,15 +158,16 @@ void CreateGraphicLinks(Info* list)
 {
     assert(list);
     int next = 0;
-    dtLinkStyle().style("bold");
+    dtLinkStyle().style ("invis");                  // Устанавливаем стиль связей
     dtLinkStyle().color("#FFFFFF"); //HEX_WHITE
-    for (int counter = 0; counter < (int) list->num_elem; counter++)
+    for (int counter = 0; counter < (int) list->num_elem - 1; counter++)
     {
-        dtLink (counter, counter + 1, "");
+        dtLink (counter, counter + 1, "");//"fontsize=200");
     }
-
+    dtLinkStyle().style   ("bold");
     dtLinkStyle().color("#000000"); //HEX_BLACK
-    for (int counter = 0; counter < (int) list->num_elem; counter++)
+    
+    for (int counter = 0; counter < (int) list->num_elem - 1; counter++)
     {
         next = list->nodes[(size_t) counter].next;
         dtLink(counter, next, "");
@@ -187,7 +178,7 @@ void TextDumpList(Info* list)
 {
     assert(list);
     
-    printf(GREEN_COLOR  "Information about this list\n");
+    printf(GREEN_COLOR  "\nInformation about this list\n");
     
     printf(BLUE_COLOR   "Head of list(next[0]) = %2d.\n"
                         "Tail of list[prev[0]] = %2d.\n",\
@@ -208,7 +199,7 @@ void TextDumpList(Info* list)
     for (size_t counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
     {
         if (counter == 0)
-            printf(RED_COLOR "ЯД ", list->nodes[counter].data);
+            printf(RED_COLOR "ЯД ");
         else if ((list->nodes[counter].data == POISON) && (list->nodes[counter].prev == -1))
             printf(YELLOW_COLOR "ЯД ");
         else if (list->nodes[counter].data == POISON)
@@ -240,7 +231,8 @@ void TextDumpList(Info* list)
             printf(GREEN_COLOR "%2d ",list->nodes[counter].prev);
     }
     printf("\n");
-    printf(YELLOW_COLOR "______________________________________\n\n");
+    printf(YELLOW_COLOR "______________________________________\n");
+    printf(GREEN_COLOR "End information\n\n");
     printf(END_COLOR);
 }
 
@@ -304,12 +296,12 @@ void ReduceRealloc(Info* list)
     assert(list);
 
     int temporaryList[MAX_SIZE_LIST] = {};
-    int counter = 0;
-    int counter_full = 0;
+    size_t counter = 0;
+    size_t counter_full = 0;
     do
     {
         temporaryList[counter_full] = list->nodes[counter].data;
-        counter = list->nodes[counter].next;
+        counter = (size_t) list->nodes[counter].next;
         counter_full++;
     } while (counter != 0);
 
@@ -332,7 +324,8 @@ void ReduceRealloc(Info* list)
         else 
             list->nodes[counter].prev = counter - 1;
     }
-    for (size_t counter = (size_t)counter_full; counter < list->num_elem + FICT_ELEM; counter++)
+    list->free = (int) counter_full;
+    for (counter = counter_full; counter < list->num_elem + FICT_ELEM; counter++)
     {
         list->nodes[counter].data = POISON;
         list->nodes[counter].next = (int) (counter + FICT_ELEM);
