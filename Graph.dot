@@ -1,32 +1,17 @@
 digraph DotGraph
 {
 rankdir=LR;
-    Node0 [shape="box", color="black", fontcolor="black", fillcolor="#EE204D", style="filled", weight="1", label="INDX =  0\nDATA = ЯД\nNEXT =  2\nPREV =  5"];
-    Node1 [shape="box", color="black", fontcolor="black", fillcolor="#F8D568", style="filled", weight="1", label="INDX =  1\nDATA = ЯД\nNEXT =  6\nPREV = -1"];
-    Node2 [shape="box", color="black", fontcolor="black", fillcolor="#7BF2DA", style="filled", weight="1", label="INDX =  2\nDATA = 60\nNEXT =  3\nPREV =  0"];
-    Node3 [shape="box", color="black", fontcolor="black", fillcolor="#21C912", style="filled", weight="1", label="INDX =  3\nDATA = 100\nNEXT =  4\nPREV =  2"];
-    Node4 [shape="box", color="black", fontcolor="black", fillcolor="#21C912", style="filled", weight="1", label="INDX =  4\nDATA = 160\nNEXT =  5\nPREV =  3"];
-    Node5 [shape="box", color="black", fontcolor="black", fillcolor="#7BF2DA", style="filled", weight="1", label="INDX =  5\nDATA = 180\nNEXT =  0\nPREV =  4"];
-    Node6 [shape="box", color="black", fontcolor="black", fillcolor="#F8D568", style="filled", weight="1", label="INDX =  6\nDATA = ЯД\nNEXT =  7\nPREV = -1"];
-    Node7 [shape="box", color="black", fontcolor="black", fillcolor="#F8D568", style="filled", weight="1", label="INDX =  7\nDATA = ЯД\nNEXT =  8\nPREV = -1"];
-    Node8 [shape="box", color="black", fontcolor="black", fillcolor="#F8D568", style="filled", weight="1", label="INDX =  8\nDATA = ЯД\nNEXT =  9\nPREV = -1"];
-    Node9 [shape="box", color="black", fontcolor="black", fillcolor="#F8D568", style="filled", weight="1", label="INDX =  9\nDATA = ЯД\nNEXT = 10\nPREV = -1"];
-    Node0 -> Node1 [color="#FFFFFF", style="invis", weight="1", label=""];
-    Node1 -> Node2 [color="#FFFFFF", style="invis", weight="1", label=""];
-    Node2 -> Node3 [color="#FFFFFF", style="invis", weight="1", label=""];
-    Node3 -> Node4 [color="#FFFFFF", style="invis", weight="1", label=""];
-    Node4 -> Node5 [color="#FFFFFF", style="invis", weight="1", label=""];
-    Node5 -> Node6 [color="#FFFFFF", style="invis", weight="1", label=""];
-    Node6 -> Node7 [color="#FFFFFF", style="invis", weight="1", label=""];
-    Node7 -> Node8 [color="#FFFFFF", style="invis", weight="1", label=""];
-    Node8 -> Node9 [color="#FFFFFF", style="invis", weight="1", label=""];
-    Node0 -> Node2 [color="#000000", style="bold", weight="1", label=""];
-    Node1 -> Node6 [color="#000000", style="bold", weight="1", label=""];
-    Node2 -> Node3 [color="#000000", style="bold", weight="1", label=""];
-    Node3 -> Node4 [color="#000000", style="bold", weight="1", label=""];
-    Node4 -> Node5 [color="#000000", style="bold", weight="1", label=""];
-    Node5 -> Node0 [color="#000000", style="bold", weight="1", label=""];
-    Node6 -> Node7 [color="#000000", style="bold", weight="1", label=""];
-    Node7 -> Node8 [color="#000000", style="bold", weight="1", label=""];
-    Node8 -> Node9 [color="#000000", style="bold", weight="1", label=""];
+    Node0 [shape="box", color="black", fontcolor="black", fillcolor="#EE204D", style="filled", weight="1", label="INDX =  0\nDATA = ЯД\nNEXT =  1\nPREV =  2"];
+    Node1 [shape="box", color="black", fontcolor="black", fillcolor="#7BF2DA", style="filled", weight="1", label="INDX =  1\nDATA = 20\nNEXT =  2\nPREV =  0"];
+    Node2 [shape="box", color="black", fontcolor="black", fillcolor="#7BF2DA", style="filled", weight="1", label="INDX =  2\nDATA = 40\nNEXT =  0\nPREV =  1"];
+    Node3 [shape="box", color="black", fontcolor="black", fillcolor="#F8D568", style="filled", weight="1", label="INDX =  3\nDATA = ЯД\nNEXT =  4\nPREV = -1"];
+    Node4 [shape="box", color="black", fontcolor="black", fillcolor="#F8D568", style="filled", weight="1", label="INDX =  4\nDATA = ЯД\nNEXT =  5\nPREV = -1"];
+    Node0 -> Node1 [color="#FFFFFF", style="invis", weight="1", label="weight = 1000"];
+    Node1 -> Node2 [color="#FFFFFF", style="invis", weight="1", label="weight = 1000"];
+    Node2 -> Node3 [color="#FFFFFF", style="invis", weight="1", label="weight = 1000"];
+    Node3 -> Node4 [color="#FFFFFF", style="invis", weight="1", label="weight = 1000"];
+    Node0 -> Node1 [color="#000000", style="bold", weight="1", label="weight = 0"];
+    Node1 -> Node2 [color="#000000", style="bold", weight="1", label="weight = 0"];
+    Node2 -> Node0 [color="#000000", style="bold", weight="1", label="weight = 0"];
+    Node3 -> Node4 [color="#000000", style="bold", weight="1", label="weight = 0"];
 }
