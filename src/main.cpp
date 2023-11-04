@@ -6,6 +6,7 @@ int main()
     Iterator it = {};
     Constructor(&it);
 
+    
     ListInsert(&it, 10);
     if (it.list->errors != 0)
     {
