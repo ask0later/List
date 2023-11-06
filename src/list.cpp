@@ -117,7 +117,7 @@ void GraphicDumpList(Iterator* it)
 {
     List* list = it-> list;
 
-    dtBegin(GRAPH_DOT);             // Начало dot-описания графа
+    dtBegin(GRAPH_DOT);             // Начало dot-описания графа \\пососи
 
     CreateGraphicNodes(list);       // Создаем узлы
     CreateGraphicLinks(list);       // Создаем связи
@@ -171,7 +171,7 @@ void CreateGraphicLinks(List* list)
     dtLinkStyle().color("#FFFFFF"); //HEX_WHITE
     for (size_t counter = 0; counter < list->size - 1; counter++)
     {
-        dtLink ((int) counter, (int) (counter + 1), "");//"fontsize=200");
+        dtLink ((int) counter, (int) (counter + 1), "");//"fontsize=200"); \\пососи
     }
     dtLinkStyle().style   ("bold");
     dtLinkStyle().color("#000000"); //HEX_BLACK
@@ -254,7 +254,7 @@ int CheckMemory(Iterator* it)
 
     if (list->free == (int) list->size)
         return IncreaseRealloc(it);
-    else if ((list->num_elem <= list->size / 4) && (list->size > MIN_SIZE_LIST))
+    else if ((list->num_elem <= list->size / 4) && (list->size > MIN_SIZE_LIST)) 
         return   ReduceRealloc(it);
     return 0;
 }
@@ -326,7 +326,7 @@ int FindErrors(Iterator* it)
     if (it->index > (int) list->size)         list->errors |= 1 << 3;
     if (list->nodes[it->index].prev == -1)    list->errors |= 1 << 4;
     if (list->free > (int) list->size)        list->errors |= 1 << 5;
-    if (list->nodes[0].data != POISON)        list->errors |= 1 << 6;
+    if (list->nodes[0].data != POISON)        list->errors |= 1 << 6; // попуск
     
     list->errors |= СheckForLooping(list);
     list->errors |= LogicCheck(list);
@@ -500,6 +500,13 @@ void FillMemory(List* list, size_t start, size_t end)
     }
 }
 
+ssize_t FindElemByValue(Iterator* it, Elem_t)
+{
+    if (FindErrors(it) != 0)
+        return -1;
+
+}
+
 void PrintDeath()
 {
     printf(GREEN_COLOR "\n"
@@ -524,12 +531,12 @@ void PrintDeath()
 "  :: . .:.HHHHHHHHMMHHHHHI.  . .:..I:MHMMHHHHHHHHHMHV:':H:WM\n"
 "  :: . :.::IIHHHHHHMMHHHHV  .ABA.:.:IMHMHMMMHMHHHHV:'. .IHWW\n"
 "  '.  ..:..:.:IHHHHHMMHV  .AVMHMA.:.'VHMMMMHHHHHV:' .  :IHWV\n"
-"  :.  .:...: .:.:TPP    .AVMMHMMA.:.  VMMHHHP. ... .. :IVAI\n"
-"  .:.   '... .: '   .   ..HMMMHMMMA::. .VHHI:::....  .:IHW\n"
-"  ...  .  . ..:IIPPIH: ..HMMMI.MMMV:I:.  .:ILLH:.. ...:I:IM\n"
+"  :.  .:...: .:.:TPP    .AVMMHMMA.:.  VMMHHHP. ... ..  :IVAI\n"
+"  .:.   '... .: '   .   ..HMMMHMMMA::. .VHHI:::....   .:IHW\n"
+"  ...  .  . ..:IIPPIH: ..HMMMI.MMMV:I:.   .:ILLH:.. ...:I:IM\n"
 " : .   .' ' .:.V . .. .  :HMMM:IMMMI::I. ..:HHIIPPHI::'.P:HM.\n"
-":.  .  .  .. ..:.. .    :AMMM IMMMM..:...:IV :T::I::. .:IHIMA\n"
-"'V:.. .. . .. .  .  .   'VMMV..VMMV :....:V:.:..:....::IHHHMH\n"
+":.  .  .  .. ..:.. .    :AMMM IMMMM..:...:IV :T::I::..:IHIMA\n"
+"'V:.. .. . .. .  .  .   'VMMV..VMMV :....:V:.:..:...::IHHHMH\n"
 "  IHH:.II:.. .:. .  . . . ; :HB   . . ..PI:.::.:::..:IHHMMV\n"
 "   :IPHHII:.  .  .    . . .'V:. . . ..:IH:.:.:: IHIHHMMMMM\n"
 "   :V:. VIMA:I..  .     .  . .. . .  .:.I:I:..:IHHHHMMHHMMM\n"
@@ -538,19 +545,19 @@ void PrintDeath()
 "   :..VIHIHMMMI...::.,:.,:! I:! I! I! V:AI:VAMMMMMMHMMMMMM'\n"
 "   ':.:HIHIMHHA:  !!I.:AXXXVVXXXXXXXA:.HPHIMMMMHHMHMMMMMV\n"
 "     V:H:I:MA:W'I :AXXXIXII:IIIISSSSSSXXA.I.VMMMHMHMMMMMM\n"
-"       'I::IVA ASSSSXSSSSBBSBMBSSSSSSBBMMMBS.VVMMHIMM'\n"
-"        I:: VPAIMSSSSSSSSSBSSSMMBSSSBBMMMMXXI:MMHIMMI\n"
-"       .I::. H:XIIXBBMMMMMMMMMMMMMMMMMBXIXXMMPHIIMM'\n"
-"       :::I.  ':XSSXXIIIIXSSBMBSSXXXIIIXXSMMAMI:.IMM\n"
-"       :::I:.  .VSSSSSISISISSSBII:ISSSSBMMB:MI:..:MM\n"
-"       ::.I:.  ':SSSSSSSISISSXIIXSSSSBMMB:AHI:..MMM.\n"
-"       ::.I:. . ..:BBSSSSSSSSSSSSBBBMMMB:AHHI::.HMMI\n"
-"       :..::.  . ..:::BBBBBSSBBBMMMB:MMMMHHII::IHHMI\n"
-"      ':.I:... ....:IHHHHHMMMMMMMMMMMMMMMHHIIIIHMMV\n"
-"         V:. ..:...:.IHHHMMMMMMMMMMMMMMMMHHHMHHMHP'\n"
-"          ':. .:::.:.::III::IHHHHMMMMMHMHMMHHHHM\n"
-"            ::....::.:::..:..::IIIIIHHHHMMMHHMV\n"
-"              ::.::.. .. .  ...:::IIHHMMMMHMV\n"
-"                 V::... . .I::IHHMMV'\n"
-"                  'VHVHHHAHHHHMMV:\n" END_COLOR);
+"        'I::IVA ASSSSXSSSSBBSBMBSSSSSSBBMMMBS.VVMMHIMM'\n"
+"         I:: VPAIMSSSSSSSSSBSSSMMBSSSBBMMMMXXI:MMHIMMI\n"
+"        .I::. H:XIIXBBMMMMMMMMMMMMMMMMMBXIXXMMPHIIMM'\n"
+"        :::I.  ':XSSXXIIIIXSSBMBSSXXXIIIXXSMMAMI:.IMM\n"
+"        :::I:.  .VSSSSSISISISSSBII:ISSSSBMMB:MI:..:MM\n"
+"        ::.I:.  ':SSSSSSSISISSXIIXSSSSBMMB:AHI:..MMM.\n"
+"        ::.I:. . ..:BBSSSSSSSSSSSSBBBMMMB:AHHI::.HMMI\n"
+"        :..::.  . ..:::BBBBBSSBBBMMMB:MMMMHHII::IHHMI\n"
+"       ':.I:... ....:IHHHHHMMMMMMMMMMMMMMMHHIIIIHMMV\n"
+"          V:. ..:...:.IHHHMMMMMMMMMMMMMMMMHHHMHHMHP'\n"
+"           ':. .:::.:.::III::IHHHHMMMMMHMHMMHHHHM\n"
+"             ::....::.:::..:..::IIIIIHHHHMMMHHMV\n"
+"               ::.::.. .. .  ...:::IIHHMMMMHMV\n"
+"                  V::... . .I::IHHMMV'\n"
+"                   'VHVHHHAHHHHMMV:\n" END_COLOR);
 }
