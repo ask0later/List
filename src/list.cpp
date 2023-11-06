@@ -171,7 +171,7 @@ void CreateGraphicLinks(List* list)
     dtLinkStyle().color("#FFFFFF"); //HEX_WHITE
     for (size_t counter = 0; counter < list->size - 1; counter++)
     {
-        dtLink ((int) counter, (int) (counter + 1), "");//"fontsize=200"); \\пососи
+        dtLink ((int) counter, (int) (counter + 1), "");//"fontsize=200");
     }
     dtLinkStyle().style   ("bold");
     dtLinkStyle().color("#000000"); //HEX_BLACK
@@ -326,7 +326,7 @@ int FindErrors(Iterator* it)
     if (it->index > (int) list->size)         list->errors |= 1 << 3;
     if (list->nodes[it->index].prev == -1)    list->errors |= 1 << 4;
     if (list->free > (int) list->size)        list->errors |= 1 << 5;
-    if (list->nodes[0].data != POISON)        list->errors |= 1 << 6; // попуск
+    if (list->nodes[0].data != POISON)        list->errors |= 1 << 6;
     
     list->errors |= СheckForLooping(list);
     list->errors |= LogicCheck(list);
