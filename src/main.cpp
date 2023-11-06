@@ -7,8 +7,7 @@ int main()
     Constructor(&it);
 
     
-    ListInsert(&it, 10);
-    if (it.list->errors != 0)
+    if (ListInsert(&it, 10) == -1)
     {
         DumpErrors(&it);
         Destructor(&it);
@@ -16,8 +15,7 @@ int main()
     } 
     TextDumpList(&it);
 
-    ListInsert(&it, 20);
-    if (it.list->errors != 0)
+    if (ListInsert(&it, 20) == -1)
     {
         DumpErrors(&it);
         Destructor(&it);
@@ -26,11 +24,11 @@ int main()
     TextDumpList(&it);
     
     int value = 0;
-    // index = next(index) <-function
+    
     it.index = Begin(&it); 
     for (ssize_t index_end = End(&it); it.index != index_end; it.index = Next(&it))
     {
-        value = GetValueList(&it); // GetValueList(Iterator it);
+        value = GetValueList(&it);
         if (it.list->errors != 0)
         {
             DumpErrors(&it);
@@ -39,10 +37,55 @@ int main()
         }
         SetValueList(&it, value * 2);
     }
+    Push_Back(&it, 90);
+    Push_Back(&it, 100);
+    Push_Back(&it, 120);
+    Push_Back(&it, 130);
+    Push_Back(&it, 140);
+    Push_Back(&it, 150);
+    Push_Back(&it, 160);
+
+    it.index = 5;
+    
+    TextDumpList(&it);
+
+    it.index = 2;
+    ListErase(&it);
+
+    TextDumpList(&it);
+
+    it.index = 7;
+    if (ListErase(&it) == -1)
+    {
+        DumpErrors(&it);
+        Destructor(&it);
+        return 1;
+    } 
+
+    TextDumpList(&it);
+
+    it.index = 6;
+    if (ListErase(&it) == -1)
+    {
+        DumpErrors(&it);
+        Destructor(&it);
+        return 1;
+    }
+
+    TextDumpList(&it);
+
+    it.index = 3;
+    if (ListErase(&it) == -1)
+    {
+        DumpErrors(&it);
+        Destructor(&it);
+        return 1;
+    }
 
     TextDumpList(&it);
    
     GraphicDumpList(&it);
 
+    PrintDeath();
     Destructor(&it);
 }

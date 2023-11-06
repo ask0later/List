@@ -52,10 +52,14 @@ ssize_t    ListErase(Iterator* it);
 
 int       DumpErrors(Iterator* it);
 
-int       FindErrors(List* list);
-int      CheckMemory(List* list);
-int  IncreaseRealloc(List* list);
-int    ReduceRealloc(List* list);
+int       FindErrors(Iterator* it);
+int      CheckMemory(Iterator* it);
+int  СheckForLooping(List* list);
+int       LogicCheck(List* list);
+
+
+int  IncreaseRealloc(Iterator* it);
+int    ReduceRealloc(Iterator* it);
 
 
 ssize_t Push_Back (Iterator* it, Elem_t value);
@@ -75,6 +79,8 @@ ssize_t SetValueList(Iterator* it, Elem_t value);
 
 void FillMemory(List* list, size_t start, size_t end);
 
+
+void PrintDeath();
 
 
 

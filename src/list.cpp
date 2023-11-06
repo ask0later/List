@@ -43,27 +43,19 @@ void Destructor(Iterator* it)
  
 ssize_t ListInsert(Iterator* it, Elem_t value)
 {
-    assert(it);
-
-    List* list   = it-> list;
-    ssize_t position = it->index; 
-    
     // position is index of element, which was after entered value
     // if (position == next[0])  value enter in start
     // if (prev[position] == -1) error!!!
     // if (position == 0)        value enter in end
 
-    list->errors = FindErrors(list);
-    
-    if (list->nodes[position].prev == POISON_COUNTER)
-        list->errors |= 1 << 4;
-
-    if (list->errors != 0)
+    if (FindErrors(it) != 0)
         return -1;
 
+    List*   list     = it ->  list;
+    ssize_t position = it -> index;
+    
 #ifdef CHECH_MEMORY
-    CheckMemory(list);
-    if (list->errors != 0)
+    if (CheckMemory(it) != 0)
         return -1;
 #endif
 
@@ -86,28 +78,21 @@ ssize_t ListInsert(Iterator* it, Elem_t value)
 
 ssize_t ListErase(Iterator* it)
 {
-    assert(it);
-
-    List* list   = it-> list;
-    ssize_t position = it->index;
-
     // int index = it.index
     
     //position - index of element, which need to remove
     // if (position == next[0])  value enter in start
     // if (position == prev[0])  value enter in end
     // if (prev[position] == -1) error!!!
-    list->errors = FindErrors(list);
     
-    if (list->nodes[position].prev == POISON_COUNTER)
-        list->errors |= 1 << 4;
-
-    if (list->errors != 0)
+    if (FindErrors(it) != 0)
         return -1;
 
+    List* list   = it-> list;
+    ssize_t position = it->index;
+
 #ifdef CHECH_MEMORY
-    CheckMemory(list);
-    if (list->errors != 0)
+    if (CheckMemory(it) != 0)
         return -1;
 #endif
 
@@ -149,7 +134,7 @@ void CreateGraphicNodes(List* list)
     dtNodeStyle ().style         ("filled");
     dtNodeStyle ().fontcolor      ("black");
 
-    char str[80] = {};
+    char str[MAX_SIZE_LIST] = {};
     for (size_t counter = 0; counter < list->size; counter++)
     {
         if ((list->nodes[counter].prev == POISON_COUNTER) || (counter == 0)) 
@@ -186,7 +171,7 @@ void CreateGraphicLinks(List* list)
     dtLinkStyle().color("#FFFFFF"); //HEX_WHITE
     for (size_t counter = 0; counter < list->size - 1; counter++)
     {
-        dtLink ((int) counter, (int) (counter + 1), "weight = 1000");//"fontsize=200");
+        dtLink ((int) counter, (int) (counter + 1), "");//"fontsize=200");
     }
     dtLinkStyle().style   ("bold");
     dtLinkStyle().color("#000000"); //HEX_BLACK
@@ -194,7 +179,7 @@ void CreateGraphicLinks(List* list)
     for (size_t counter = 0; counter < list->size - 1; counter++)
     {
         next = (int) list->nodes[counter].next;
-        dtLink((int)counter, next, "weight = 0");
+        dtLink((int)counter, next, "");
     }
 }
 
@@ -263,34 +248,34 @@ void TextDumpList(Iterator* it)
     printf(END_COLOR);
 }
 
-int CheckMemory(List* list)
+int CheckMemory(Iterator* it)
 {
-    assert(list);
+    List* list = it-> list;
 
     if (list->free == (int) list->size)
-        return IncreaseRealloc(list);
+        return IncreaseRealloc(it);
     else if ((list->num_elem <= list->size / 4) && (list->size > MIN_SIZE_LIST))
-        return ReduceRealloc(list);
+        return   ReduceRealloc(it);
     return 0;
 }
-int IncreaseRealloc(List* list)
+int IncreaseRealloc(Iterator* it)
 {
-    assert(list);
-    
+    List* list = it-> list;
+
     list->size *= VALUE_REALLOC;
-    list->nodes = (Node*) realloc(list->nodes, (list->size + FICT_ELEM) * sizeof(Node));
-    if (list->nodes == NULL) {list->errors = 1 << 5; return list->errors;}
-    
+    Node* new_list = (Node*) realloc(list->nodes, (list->size + FICT_ELEM) * sizeof(Node));
+    if (new_list == NULL) {list->errors = 1 << 9; return list->errors;}
+    list->nodes = new_list;
+        
     FillMemory(list, list->size / VALUE_REALLOC + FICT_ELEM, list->size + FICT_ELEM);
     
-
-    list->errors = FindErrors(list);
+    list->errors = FindErrors(it);
     return list->errors;
 }
-int ReduceRealloc(List* list)
+int ReduceRealloc(Iterator* it)
 {
-    assert(list);
-
+    List* list = it-> list;
+    
     int temporaryList[MAX_SIZE_LIST] = {};
     size_t counter      = 0;
     size_t counter_full = 0;
@@ -304,11 +289,11 @@ int ReduceRealloc(List* list)
     free(list->nodes);
 
     list->size /= VALUE_REALLOC;
+    Node* new_list = (Node*) calloc(list->size + FICT_ELEM, sizeof(Node)); 
+    if (new_list == NULL) {list->errors = 1 << 9; return list->errors;}
+    list->nodes = new_list;
 
-    list->nodes = (Node*) calloc(list->size + FICT_ELEM, sizeof(Node));
-    if (list->nodes == NULL) {list->errors = 1 << 5; return list->errors;}
-
-    for (counter = 0; counter < counter_full; counter++)
+    for (counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
     {
         list->nodes[counter].data = temporaryList[counter];
 
@@ -325,44 +310,104 @@ int ReduceRealloc(List* list)
 
     FillMemory(list, counter_full, list->size + FICT_ELEM);
 
-    list->errors = FindErrors(list);
+    list->errors = FindErrors(it);
     return list->errors;
 }
 
-int FindErrors(List* list)
+int FindErrors(Iterator* it)
 {
-    if (list == NULL)                         list->errors = 1 << 0;
-    if (list->nodes == NULL)                  list->errors = 1 << 1;
-    if (list->free > (int) list->size)        list->errors = 1 << 2;
-    if (list->nodes[0].data != POISON)        list->errors = 1 << 3;
+    if (it          == NULL)                           return 1 << 0;
+    
+    List* list = it-> list;
 
+    if (list        == NULL)                           return 1 << 1;
+    if (list->nodes == NULL)                           return 1 << 2;
+
+    if (it->index > (int) list->size)         list->errors |= 1 << 3;
+    if (list->nodes[it->index].prev == -1)    list->errors |= 1 << 4;
+    if (list->free > (int) list->size)        list->errors |= 1 << 5;
+    if (list->nodes[0].data != POISON)        list->errors |= 1 << 6;
+    
+    list->errors |= СheckForLooping(list);
+    list->errors |= LogicCheck(list);
     return list->errors;
 }
+
+int СheckForLooping(List* list)
+{
+    size_t counter_full = 0;
+    size_t counter      = (size_t) list->nodes[0].next;
+    size_t counterstart = counter;
+    if (list->num_elem == 0)
+        return 0;
+    do
+    {
+        counter = (size_t) list->nodes[counter].next;
+        counter_full++;
+        if (counter == 0)
+            return 0;
+        if (counter == counterstart)
+            return 1 << 7;
+    } while (counter_full < list->size);
+    
+    return 0;
+}
+
+int LogicCheck(List* list)
+{
+    size_t counter_full = 0;
+    size_t counter_new  = 0;
+    size_t counter_old  = 0;
+    do
+    {
+        counter_old = counter_new;
+        counter_new = (size_t) list->nodes[counter_old].next;
+        if (list->nodes[counter_new].prev != (int) counter_old)
+            return 1 << 8;
+        counter_full++;
+    } while (counter_full < list->size);
+    
+    return 0;
+}
+
 
 int DumpErrors(Iterator* it)
 {
     List* list = it-> list;
     if (list->errors == 0)
-        return 0;
-    switch(list->errors) 
+        list->errors = 1 << 0;
+
+    switch(list->errors)
     {
         case 1 << 0:
-            printf("ERRORS : LIST IS NULL\n");
+            printf("ERRORS : it is null\n");
             break;
         case 1 << 1:
-            printf("ERRORS : NODES IS NULL\n");
+            printf("ERRORS : list is null\n");
             break;
         case 1 << 2:
-            printf("ERRORS : EXCESS MEMORY IS USED\n");
+            printf("ERRORS : nodes is null\n");
             break;
         case 1 << 3:
-            printf("ERRORS : THE FICTITIOUS ELEMENT WAS AFFECTED\n");
+            printf("ERROR : index above size\n");
             break;
         case 1 << 4:
-            printf("ERRORS : INVALID FUNCTION ARGUMENT\n");
+            printf("ERROR : index on free memory\n");
             break;
         case 1 << 5:
-            printf("ERRORS : FAIL ALLOCATION\n");
+            printf("ERROR : excess memory is used\n");
+            break;
+        case 1 << 6:
+            printf("ERROR : the dictitious element was affecred\n");
+            break;
+        case 1 << 7:
+            printf("ERROR : elements are looped\n");
+            break;
+        case 1 << 8:
+            printf("ERROR : logical error(prev[next[position]] != position)\n");
+            break;
+        case 1 << 9:
+            printf("ERROR : FAIL ALLOCATION\n");
             break;
         default:
             printf("EXTRA ERROR\n");
@@ -375,12 +420,6 @@ int DumpErrors(Iterator* it)
 
 ssize_t Push_Back(Iterator* it, Elem_t value)
 {
-    List* list = it->list;
-
-    list->errors = FindErrors(list);
-    if (list->errors != 0)
-        return -1;
-
     it->index = 0;
     
     return ListInsert(it, value);
@@ -388,91 +427,64 @@ ssize_t Push_Back(Iterator* it, Elem_t value)
 
 ssize_t Push_Front(Iterator* it, Elem_t value)
 {
-    List* list = it->list;
-    
-    list->errors = FindErrors(list);
-    if (list->errors != 0)
-        return -1;
-
-    it->index = list->nodes[0].next;
+    it->index = it->list->nodes[0].next;
     
     return ListInsert(it, value);
 }
 
 ssize_t Pop_Back(Iterator* it)
 {
-    List* list = it->list;
-
-    list->errors = FindErrors(list);
-    if (list->errors != 0)
-        return -1;
-    
-    it->index = list->nodes[0].prev;
+    it->index = it->list->nodes[0].prev;
     
     return ListErase(it);
 }
 
 ssize_t Pop_Front(Iterator* it)
 {
-    List* list = it->list;
-
-    list->errors = FindErrors(list);
-    if (list->errors != 0)
-        return -1;
-
-    it->index = list->nodes[0].next;
+    it->index = it->list->nodes[0].next;
     
     return ListErase(it);
 }
 
 ssize_t Begin(Iterator* it)
 {
-    List* list = it->list;
-
-    list->errors = FindErrors(list);
-    if (list->errors != 0)
+    if (FindErrors(it) != 0)
         return -1;
 
-    return (list->nodes[0].next);
+    return (it->list->nodes[0].next);
 }
 
 ssize_t   End(Iterator* it)
 {
-    List* list = it->list;
-
-    list->errors = FindErrors(list);
-    if (list->errors != 0)
+    if (FindErrors(it) != 0)
         return -1;
     // return 0 is OK
-    return (list->nodes[list->nodes[0].prev].next);  // always return 0
+    return (it->list->nodes[it->list->nodes[0].prev].next);  // always return 0
 }
 
 Elem_t GetValueList(Iterator* it)
 {
-    List* list = it->list;
-
-    list->errors = FindErrors(list);
-    if (list->errors != 0)
+    if (FindErrors(it) != 0)
         return -1;
 
-    Elem_t return_value = list->nodes[it->index].data;
+    Elem_t return_value = it->list->nodes[it->index].data;
     return return_value;
 }
 
 ssize_t SetValueList(Iterator* it, Elem_t value)
 {
-    List* list = it->list;
-
-    list->errors = FindErrors(list);
-    if (list->errors != 0)
+    if (FindErrors(it) != 0)
         return -1;
 
-    list->nodes[it->index].data = value;
+    it->list->nodes[it->index].data = value;
     return it->index;
 }
 
 ssize_t Next(Iterator* it)
 {
+    if (FindErrors(it) != 0)
+        return -1;
+
     return (it->list->nodes[it->index].next);
 }
 
@@ -486,4 +498,59 @@ void FillMemory(List* list, size_t start, size_t end)
         list->nodes[counter].next = (int) (counter + FICT_ELEM);
         list->nodes[counter].prev = POISON_COUNTER;
     }
+}
+
+void PrintDeath()
+{
+    printf(GREEN_COLOR "\n"
+"                          ...----....\n"
+"                    ..-:''         '' -..\n"
+"                 .-'                      '-.\n"
+"               .'              .     .       '.\n"
+"             .'   .          .    .      .    .''.\n"
+"           .'  .    .       .   .   .     .   . ..:.\n"
+"         .' .   . .  .       .   .   ..  .   . ....::.\n"
+"        ..   .   .      .  .    .     .  ..  . ....:IA.\n"
+"       .:  .   .    .    .  .  .    .. .  .. .. ....:IA.\n"
+"      .: .   .   ..   .    .     . . .. . ... ....:.:VHA.\n"
+"      '..  .  .. .   .       .  . .. . .. . .....:.::IHHB.\n"
+"     .:. .  . .  . .   .  .  . . . ...:.:... .......:HIHMM.\n"
+"    .:.... .   . .::  '.. .   .  . .:.:.:II;,. .. ..:IHIMMA\n"
+"    ':.:..  ..::IHHHHHI::. . .  ...:.::::.,,,. . ....VIMMHM\n"
+"   .:::I. .AHHHHHHHHHHAI::. .:...,:IIHHHHHHMMMHHL:. . VMMMM\n"
+"  .:.:V.:IVHHHHHHHMHMHHH::..: .:HIHHHHHHHHHHHHHMHHA. .VMMM. \n"
+"  :..V.:IVHHHHHMMHHHHHHHB... . .:VPHHMHHHMMHHHHHHHHHAI.:VMMI\n"
+"  ::V..:VIHHHHHHMMMHHHHHH. .   .I :IIMHHMMHHHHHHHHHHHAPI:WMM\n"
+"  :: . .:.HHHHHHHHMMHHHHHI.  . .:..I:MHMMHHHHHHHHHMHV:':H:WM\n"
+"  :: . :.::IIHHHHHHMMHHHHV  .ABA.:.:IMHMHMMMHMHHHHV:'. .IHWW\n"
+"  '.  ..:..:.:IHHHHHMMHV  .AVMHMA.:.'VHMMMMHHHHHV:' .  :IHWV\n"
+"  :.  .:...: .:.:TPP    .AVMMHMMA.:.  VMMHHHP. ... .. :IVAI\n"
+"  .:.   '... .: '   .   ..HMMMHMMMA::. .VHHI:::....  .:IHW\n"
+"  ...  .  . ..:IIPPIH: ..HMMMI.MMMV:I:.  .:ILLH:.. ...:I:IM\n"
+" : .   .' ' .:.V . .. .  :HMMM:IMMMI::I. ..:HHIIPPHI::'.P:HM.\n"
+":.  .  .  .. ..:.. .    :AMMM IMMMM..:...:IV :T::I::. .:IHIMA\n"
+"'V:.. .. . .. .  .  .   'VMMV..VMMV :....:V:.:..:....::IHHHMH\n"
+"  IHH:.II:.. .:. .  . . . ; :HB   . . ..PI:.::.:::..:IHHMMV\n"
+"   :IPHHII:.  .  .    . . .'V:. . . ..:IH:.:.:: IHIHHMMMMM\n"
+"   :V:. VIMA:I..  .     .  . .. . .  .:.I:I:..:IHHHHMMHHMMM\n"
+"   :VI:.VWMA::. .:      .   .. .:. ..:.I::.:IVHHHMMMHMMMMI\n"
+"   :. VIIHHMMA:.  .   .   .:  .:.. . .:.II:I:AMMMMMMHMMMMMIv\n"
+"   :..VIHIHMMMI...::.,:.,:! I:! I! I! V:AI:VAMMMMMMHMMMMMM'\n"
+"   ':.:HIHIMHHA:  !!I.:AXXXVVXXXXXXXA:.HPHIMMMMHHMHMMMMMV\n"
+"     V:H:I:MA:W'I :AXXXIXII:IIIISSSSSSXXA.I.VMMMHMHMMMMMM\n"
+"       'I::IVA ASSSSXSSSSBBSBMBSSSSSSBBMMMBS.VVMMHIMM'\n"
+"        I:: VPAIMSSSSSSSSSBSSSMMBSSSBBMMMMXXI:MMHIMMI\n"
+"       .I::. H:XIIXBBMMMMMMMMMMMMMMMMMBXIXXMMPHIIMM'\n"
+"       :::I.  ':XSSXXIIIIXSSBMBSSXXXIIIXXSMMAMI:.IMM\n"
+"       :::I:.  .VSSSSSISISISSSBII:ISSSSBMMB:MI:..:MM\n"
+"       ::.I:.  ':SSSSSSSISISSXIIXSSSSBMMB:AHI:..MMM.\n"
+"       ::.I:. . ..:BBSSSSSSSSSSSSBBBMMMB:AHHI::.HMMI\n"
+"       :..::.  . ..:::BBBBBSSBBBMMMB:MMMMHHII::IHHMI\n"
+"      ':.I:... ....:IHHHHHMMMMMMMMMMMMMMMHHIIIIHMMV\n"
+"         V:. ..:...:.IHHHMMMMMMMMMMMMMMMMHHHMHHMHP'\n"
+"          ':. .:::.:.::III::IHHHHMMMMMHMHMMHHHHM\n"
+"            ::....::.:::..:..::IIIIIHHHHMMMHHMV\n"
+"              ::.::.. .. .  ...:::IIHHMMMMHMV\n"
+"                 V::... . .I::IHHMMV'\n"
+"                  'VHVHHHAHHHHMMV:\n" END_COLOR);
 }
