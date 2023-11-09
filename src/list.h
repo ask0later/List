@@ -76,11 +76,9 @@ ssize_t SetValueList(Iterator* it, Elem_t value);
 
 
 
+ssize_t FindElemByValue(Iterator* it, Elem_t value);
 
 void FillMemory(List* list, size_t start, size_t end);
-
-
-void PrintDeath();
 
 
 

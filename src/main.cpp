@@ -86,6 +86,5 @@ int main()
    
     GraphicDumpList(&it);
 
-    PrintDeath();
     Destructor(&it);
 }

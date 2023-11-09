@@ -190,7 +190,7 @@ void TextDumpList(Iterator* it)
     List* list = it-> list;
 
     
-    printf(GREEN_COLOR  "\nListrmation about this list\n");
+    printf(GREEN_COLOR  "\nList information about this list\n");
     
     printf(BLUE_COLOR   "Head of list(next[0]) = %3ld.\n"
                         "Tail of list[prev[0]] = %3ld.\n",\
@@ -330,6 +330,7 @@ int FindErrors(Iterator* it)
     
     list->errors |= СheckForLooping(list);
     list->errors |= LogicCheck(list);
+
     return list->errors;
 }
 
@@ -500,64 +501,21 @@ void FillMemory(List* list, size_t start, size_t end)
     }
 }
 
-ssize_t FindElemByValue(Iterator* it, Elem_t)
+ssize_t FindElemByValue(Iterator* it, Elem_t value)
 {
-    if (FindErrors(it) != 0)
-        return -1;
+    // if (FindErrors(it) != 0)
+    //     return -1;
+    
+    printf(GREEN_COLOR "                              __ATTENTION__\n"
+           "was used to search for an element by value, which uses, oh my God, a loop\n");
 
-}
+    ssize_t counter      = 0;
+    do
+    {
+        if (it->list->nodes[counter].data == value)
+            return counter;
+        counter = it->list->nodes[counter].next;
+    } while (counter != 0);
 
-void PrintDeath()
-{
-    printf(GREEN_COLOR "\n"
-"                          ...----....\n"
-"                    ..-:''         '' -..\n"
-"                 .-'                      '-.\n"
-"               .'              .     .       '.\n"
-"             .'   .          .    .      .    .''.\n"
-"           .'  .    .       .   .   .     .   . ..:.\n"
-"         .' .   . .  .       .   .   ..  .   . ....::.\n"
-"        ..   .   .      .  .    .     .  ..  . ....:IA.\n"
-"       .:  .   .    .    .  .  .    .. .  .. .. ....:IA.\n"
-"      .: .   .   ..   .    .     . . .. . ... ....:.:VHA.\n"
-"      '..  .  .. .   .       .  . .. . .. . .....:.::IHHB.\n"
-"     .:. .  . .  . .   .  .  . . . ...:.:... .......:HIHMM.\n"
-"    .:.... .   . .::  '.. .   .  . .:.:.:II;,. .. ..:IHIMMA\n"
-"    ':.:..  ..::IHHHHHI::. . .  ...:.::::.,,,. . ....VIMMHM\n"
-"   .:::I. .AHHHHHHHHHHAI::. .:...,:IIHHHHHHMMMHHL:. . VMMMM\n"
-"  .:.:V.:IVHHHHHHHMHMHHH::..: .:HIHHHHHHHHHHHHHMHHA. .VMMM. \n"
-"  :..V.:IVHHHHHMMHHHHHHHB... . .:VPHHMHHHMMHHHHHHHHHAI.:VMMI\n"
-"  ::V..:VIHHHHHHMMMHHHHHH. .   .I :IIMHHMMHHHHHHHHHHHAPI:WMM\n"
-"  :: . .:.HHHHHHHHMMHHHHHI.  . .:..I:MHMMHHHHHHHHHMHV:':H:WM\n"
-"  :: . :.::IIHHHHHHMMHHHHV  .ABA.:.:IMHMHMMMHMHHHHV:'. .IHWW\n"
-"  '.  ..:..:.:IHHHHHMMHV  .AVMHMA.:.'VHMMMMHHHHHV:' .  :IHWV\n"
-"  :.  .:...: .:.:TPP    .AVMMHMMA.:.  VMMHHHP. ... ..  :IVAI\n"
-"  .:.   '... .: '   .   ..HMMMHMMMA::. .VHHI:::....   .:IHW\n"
-"  ...  .  . ..:IIPPIH: ..HMMMI.MMMV:I:.   .:ILLH:.. ...:I:IM\n"
-" : .   .' ' .:.V . .. .  :HMMM:IMMMI::I. ..:HHIIPPHI::'.P:HM.\n"
-":.  .  .  .. ..:.. .    :AMMM IMMMM..:...:IV :T::I::..:IHIMA\n"
-"'V:.. .. . .. .  .  .   'VMMV..VMMV :....:V:.:..:...::IHHHMH\n"
-"  IHH:.II:.. .:. .  . . . ; :HB   . . ..PI:.::.:::..:IHHMMV\n"
-"   :IPHHII:.  .  .    . . .'V:. . . ..:IH:.:.:: IHIHHMMMMM\n"
-"   :V:. VIMA:I..  .     .  . .. . .  .:.I:I:..:IHHHHMMHHMMM\n"
-"   :VI:.VWMA::. .:      .   .. .:. ..:.I::.:IVHHHMMMHMMMMI\n"
-"   :. VIIHHMMA:.  .   .   .:  .:.. . .:.II:I:AMMMMMMHMMMMMIv\n"
-"   :..VIHIHMMMI...::.,:.,:! I:! I! I! V:AI:VAMMMMMMHMMMMMM'\n"
-"   ':.:HIHIMHHA:  !!I.:AXXXVVXXXXXXXA:.HPHIMMMMHHMHMMMMMV\n"
-"     V:H:I:MA:W'I :AXXXIXII:IIIISSSSSSXXA.I.VMMMHMHMMMMMM\n"
-"        'I::IVA ASSSSXSSSSBBSBMBSSSSSSBBMMMBS.VVMMHIMM'\n"
-"         I:: VPAIMSSSSSSSSSBSSSMMBSSSBBMMMMXXI:MMHIMMI\n"
-"        .I::. H:XIIXBBMMMMMMMMMMMMMMMMMBXIXXMMPHIIMM'\n"
-"        :::I.  ':XSSXXIIIIXSSBMBSSXXXIIIXXSMMAMI:.IMM\n"
-"        :::I:.  .VSSSSSISISISSSBII:ISSSSBMMB:MI:..:MM\n"
-"        ::.I:.  ':SSSSSSSISISSXIIXSSSSBMMB:AHI:..MMM.\n"
-"        ::.I:. . ..:BBSSSSSSSSSSSSBBBMMMB:AHHI::.HMMI\n"
-"        :..::.  . ..:::BBBBBSSBBBMMMB:MMMMHHII::IHHMI\n"
-"       ':.I:... ....:IHHHHHMMMMMMMMMMMMMMMHHIIIIHMMV\n"
-"          V:. ..:...:.IHHHMMMMMMMMMMMMMMMMHHHMHHMHP'\n"
-"           ':. .:::.:.::III::IHHHHMMMMMHMHMMHHHHM\n"
-"             ::....::.:::..:..::IIIIIHHHHMMMHHMV\n"
-"               ::.::.. .. .  ...:::IIHHMMMMHMV\n"
-"                  V::... . .I::IHHMMV'\n"
-"                   'VHVHHHAHHHHMMV:\n" END_COLOR);
+    return 0;
 }
