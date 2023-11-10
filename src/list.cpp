@@ -130,7 +130,7 @@ void CreateGraphicNodes(List* list)
 {
     assert(list);
 
-    dtNodeStyle ().shape            ("box"); // Устанавливаем стиль узлов
+    dtNodeStyle ().shape            ("box");   // Устанавливаем стиль узлов
     dtNodeStyle ().style         ("filled");
     dtNodeStyle ().fontcolor      ("black");
 
@@ -248,17 +248,17 @@ void TextDumpList(Iterator* it)
     printf(END_COLOR);
 }
 
-int CheckMemory(Iterator* it)
+ssize_t CheckMemory(Iterator* it)
 {
     List* list = it-> list;
 
     if (list->free == (int) list->size)
         return IncreaseRealloc(it);
     else if ((list->num_elem <= list->size / 4) && (list->size > MIN_SIZE_LIST)) 
-        return   ReduceRealloc(it);
+        return  ReduceRealloc(it);
     return 0;
 }
-int IncreaseRealloc(Iterator* it)
+ssize_t IncreaseRealloc(Iterator* it)
 {
     List* list = it-> list;
 
@@ -272,49 +272,16 @@ int IncreaseRealloc(Iterator* it)
     list->errors = FindErrors(it);
     return list->errors;
 }
-int ReduceRealloc(Iterator* it)
+ssize_t ReduceRealloc(Iterator* it)
 {
-    List* list = it-> list;
+    it->list->size /= VALUE_REALLOC;
     
-    int temporaryList[MAX_SIZE_LIST] = {};
-    size_t counter      = 0;
-    size_t counter_full = 0;
-    do
-    {
-        temporaryList[counter_full] = list->nodes[counter].data;
-        counter = (size_t) list->nodes[counter].next;
-        counter_full++;
-    } while (counter != 0);
-
-    free(list->nodes);
-
-    list->size /= VALUE_REALLOC;
-    Node* new_list = (Node*) calloc(list->size + FICT_ELEM, sizeof(Node)); 
-    if (new_list == NULL) {list->errors = 1 << 9; return list->errors;}
-    list->nodes = new_list;
-
-    for (counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
-    {
-        list->nodes[counter].data = temporaryList[counter];
-
-        if (counter == counter_full - 1)
-            list->nodes[counter].next = 0;
-        else
-            list->nodes[counter].next = (int) (counter + 1);
-        if (counter == 0)
-            list->nodes[counter].prev = (int) (counter_full - 1);
-        else 
-            list->nodes[counter].prev = (int) (counter - 1);
-    }
-    list->free = (int) counter_full;
-
-    FillMemory(list, counter_full, list->size + FICT_ELEM);
-
-    list->errors = FindErrors(it);
-    return list->errors;
+    Linearization(it);
+    
+    return it->list->errors;
 }
 
-int FindErrors(Iterator* it)
+ssize_t FindErrors(Iterator* it)
 {
     if (it          == NULL)                           return 1 << 0;
     
@@ -334,7 +301,7 @@ int FindErrors(Iterator* it)
     return list->errors;
 }
 
-int СheckForLooping(List* list)
+ssize_t СheckForLooping(List* list)
 {
     size_t counter_full = 0;
     size_t counter      = (size_t) list->nodes[0].next;
@@ -354,7 +321,7 @@ int СheckForLooping(List* list)
     return 0;
 }
 
-int LogicCheck(List* list)
+ssize_t LogicCheck(List* list)
 {
     size_t counter_full = 0;
     size_t counter_new  = 0;
@@ -415,7 +382,7 @@ int DumpErrors(Iterator* it)
             break;
     }
 
-    return list->errors;
+    return (int) list->errors;
 }
 
 
@@ -518,4 +485,45 @@ ssize_t FindElemByValue(Iterator* it, Elem_t value)
     } while (counter != 0);
 
     return 0;
+}
+
+ssize_t Linearization(Iterator* it)
+{
+    List* list = it->list;
+    
+    int temporaryList[MAX_SIZE_LIST] = {};
+    size_t counter      = 0;
+    size_t counter_full = 0;
+    do
+    {
+        temporaryList[counter_full] = list->nodes[counter].data;
+        counter = (size_t) list->nodes[counter].next;
+        counter_full++;
+    } while (counter != 0);
+
+    free(list->nodes);
+
+    Node* new_list = (Node*) calloc(list->size + FICT_ELEM, sizeof(Node)); 
+    if (new_list == NULL) {list->errors = 1 << 9; return list->errors;}
+    list->nodes = new_list;
+
+    for (counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
+    {
+        list->nodes[counter].data = temporaryList[counter];
+
+        if (counter == counter_full - 1)
+            list->nodes[counter].next = 0;
+        else
+            list->nodes[counter].next = (int) (counter + 1);
+        if (counter == 0)
+            list->nodes[counter].prev = (int) (counter_full - 1);
+        else 
+            list->nodes[counter].prev = (int) (counter - 1);
+    }
+    list->free = (int) counter_full;
+
+    FillMemory(list, counter_full, list->size + FICT_ELEM);
+
+    list->errors = FindErrors(it);
+    return list->errors;
 }

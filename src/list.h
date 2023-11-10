@@ -29,7 +29,7 @@ struct List
     size_t      size;
     size_t  num_elem;
     ssize_t     free;
-    int       errors;
+    ssize_t   errors;
 };
 
 struct Iterator 
@@ -52,14 +52,15 @@ ssize_t    ListErase(Iterator* it);
 
 int       DumpErrors(Iterator* it);
 
-int       FindErrors(Iterator* it);
-int      CheckMemory(Iterator* it);
-int  СheckForLooping(List* list);
-int       LogicCheck(List* list);
+ssize_t       FindErrors(Iterator* it);
+ssize_t      CheckMemory(Iterator* it);
+ssize_t  СheckForLooping(List* list);
+ssize_t       LogicCheck(List* list);
 
 
-int  IncreaseRealloc(Iterator* it);
-int    ReduceRealloc(Iterator* it);
+ssize_t  IncreaseRealloc(Iterator* it);
+ssize_t    ReduceRealloc(Iterator* it);
+ssize_t    Linearization(Iterator* it);
 
 
 ssize_t Push_Back (Iterator* it, Elem_t value);

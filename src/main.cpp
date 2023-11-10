@@ -83,7 +83,12 @@ int main()
     }
 
     TextDumpList(&it);
-   
+    
+    Linearization(&it);
+
+    TextDumpList(&it);
+
+
     GraphicDumpList(&it);
 
     Destructor(&it);
