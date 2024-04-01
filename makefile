@@ -6,16 +6,17 @@ CFLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loo
 -Winit-self -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=2 -Wsuggest-attribute=noreturn \
 -Wsuggest-final-methods -Wsuggest-final-types -Wsuggest-override -Wswitch-default -Wswitch-enum -Wsync-nand -Wundef -Wunreachable-code -Wunused \
 -Wuseless-cast -Wvariadic-macros -Wno-literal-suffix -Wno-missing-field-initializers -Wno-narrowing -Wno-old-style-cast -Wno-varargs -Wstack-protector \
--fcheck-new -fsized-deallocation -fstack-protector -fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer -Wlarger-than=8192 -Wstack-usage=8192 -pie -fPIE -Werror=vla \
+-fcheck-new -fsized-deallocation -fstack-protector -fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer -Wstack-usage=8192 -pie -fPIE -Werror=vla \
 -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
+IFLAGS = -I./inc/
 
-PREF_SRC = ./src/
-PREF_OBJ = ./obj/
-PREF_INC = ./hdr/
+SRC_FOLDER = ./src/
+OBJ_FOLDER = ./obj/
 
-SRC = $(wildcard $(PREF_SRC)*.cpp)
-OBJ = $(patsubst $(PREF_SRC)%.cpp, $(PREF_OBJ)%.o, $(SRC))
+
+SRC    = $(wildcard $(SRC_FOLDER)*.cpp)
+OBJ    = $(patsubst $(SRC_FOLDER)%.cpp, $(OBJ_FOLDER)%.o, $(SRC))
 
 
 $(TARGET) : $(OBJ) 
@@ -24,5 +25,12 @@ $(TARGET) : $(OBJ)
 $(PREF_OBJ)%.o : $(PREF_SRC)%.cpp
 	@$(CC) $(DEFINE) $(CFLAGS) -c $< -o $@
 
-clean : 
-	rm $(TARGET) $(PREF_OBJ)*.o
+$(TARGET) : $(OBJ)
+	@$(CC) $(IFLAGS) $(CFLAGS) $(OBJ) -o $(TARGET) -lm
+
+$(OBJ_FOLDER)%.o : $(SRC_FOLDER)%.cpp
+	@mkdir -p $(@D)
+	@$(CC) $(IFLAGS) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm $(TARGET) $(OBJ)
