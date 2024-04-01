@@ -6,7 +6,8 @@
 #include <limits.h>
 #include <unistd.h>
 
-typedef int Elem_t;
+typedef char* Elem_t;
+
 const int    POISON_COUNTER  =      -1;
 const int    POISON          = INT_MAX;
 const size_t NUM_NODES       =      10;
@@ -45,8 +46,8 @@ void CreateGraphicNodes(List* list);
 void CreateGraphicLinks(List* list);
 
 
-void     Constructor(Iterator* it);
-void      Destructor(Iterator* it);
+void     CtorIterator(Iterator* it);
+void     DtorIterator(Iterator* it);
 ssize_t   ListInsert(Iterator* it, Elem_t value);
 ssize_t    ListErase(Iterator* it); 
 
@@ -74,7 +75,6 @@ ssize_t       Next(Iterator* it);
 
 Elem_t  GetValueList(Iterator* it);
 ssize_t SetValueList(Iterator* it, Elem_t value);
-
 
 
 ssize_t FindElemByValue(Iterator* it, Elem_t value);

@@ -8,7 +8,7 @@ const char* GRAPH_DOT = "Graph.dot";
 const char* GRAPH_JMP = "Graph.ipg";
 
 
-void Constructor(Iterator* it)
+void CtorIterator(Iterator* it)
 {
     assert(it);
 
@@ -26,12 +26,13 @@ void Constructor(Iterator* it)
 
     FillMemory(list, FICT_ELEM, list->size + FICT_ELEM);
 
-    list->nodes[0].data = POISON;
+    list->nodes[0].data = (char*) POISON;
     list->nodes[0].prev = 0;
     list->nodes[0].next = 0;
 }
 
-void Destructor(Iterator* it)
+
+void DtorIterator(Iterator* it)
 {
     List* list = it->list; 
     list->free   = POISON;
@@ -101,7 +102,7 @@ ssize_t ListErase(Iterator* it)
     list->nodes[list->nodes[position].prev].next = list->nodes[position].next;   // next[prev[position]] = next[position];
     list->nodes[list->nodes[position].next].prev = list->nodes[position].prev;   // prev[next[position]] = prev[position];
 
-    list->nodes[position].data =          POISON;               // data[position] = POISON;
+    list->nodes[position].data =  (char*) POISON;               // data[position] = POISON;
     list->nodes[position].prev =  POISON_COUNTER;               // prev[position] =     -1;
     list->nodes[position].next =      list->free;               // next[position] =   free;
 
@@ -117,15 +118,17 @@ void GraphicDumpList(Iterator* it)
 {
     List* list = it-> list;
 
-    dtBegin(GRAPH_DOT);             // Начало dot-описания графа \\пососи
+    dtBegin(GRAPH_DOT);             // Начало dot-описания графа
 
     CreateGraphicNodes(list);       // Создаем узлы
     CreateGraphicLinks(list);       // Создаем связи
 
-    dtEnd(); // Конец dot-описания графа
+    dtEnd();                        // Конец dot-описания графа
 
     dtRender(GRAPH_DOT);
 }
+
+
 void CreateGraphicNodes(List* list)
 {
     assert(list);
@@ -147,7 +150,7 @@ void CreateGraphicNodes(List* list)
         else
         {
             sprintf(str, "INDX = %2lu\n"
-                         "DATA = %2d\n"
+                         "DATA = %s\n"
                          "NEXT = %2ld\n"
                          "PREV = %2ld", counter, list->nodes[counter].data, list->nodes[counter].next, list->nodes[counter].prev);
         }
@@ -163,6 +166,8 @@ void CreateGraphicNodes(List* list)
         dtNode((int) counter, str);
     }
 }
+
+
 void CreateGraphicLinks(List* list)
 {
     assert(list);
@@ -189,7 +194,6 @@ void TextDumpList(Iterator* it)
 
     List* list = it-> list;
 
-    
     printf(GREEN_COLOR  "\nList information about this list\n");
     
     printf(BLUE_COLOR   "Head of list(next[0]) = %3ld.\n"
@@ -203,7 +207,7 @@ void TextDumpList(Iterator* it)
     printf(BOLD_RED_COLOR "INDX ");
     for (size_t counter = 0; counter < list->size + FICT_ELEM; counter++)
     {
-        printf("%3lu ", counter);
+        printf("%10lu ", counter);
     }
     printf("\n");
 
@@ -211,13 +215,13 @@ void TextDumpList(Iterator* it)
     for (size_t counter = 0; counter < list->size + FICT_ELEM; counter++)
     {
         if (counter == 0)
-            printf(RED_COLOR " ЯД ");
-        else if ((list->nodes[counter].data == POISON) && (list->nodes[counter].prev == -1))
-            printf(YELLOW_COLOR " ЯД ");
-        else if (list->nodes[counter].data == POISON)
-            printf(GREEN_COLOR " ЯД ");
+            printf(RED_COLOR "    ЯД    ");
+        else if ((list->nodes[counter].data == (char*) POISON) && (list->nodes[counter].prev == -1))
+            printf(YELLOW_COLOR "    ЯД    ");
+        else if (list->nodes[counter].data == (char*) POISON)
+            printf(GREEN_COLOR "    ЯД    ");
         else
-            printf(GREEN_COLOR "%3d ",list->nodes[counter].data);
+            printf(GREEN_COLOR "%10s ",list->nodes[counter].data);
     }
     printf("\n");
     
@@ -225,22 +229,22 @@ void TextDumpList(Iterator* it)
     for (size_t counter = 0; counter < list->size + FICT_ELEM; counter++)
     {
         if (counter == 0)
-            printf(RED_COLOR "%3ld ", list->nodes[counter].next);
+            printf(RED_COLOR "%10ld ", list->nodes[counter].next);
         else if (list->nodes[counter].prev == -1)
-            printf(YELLOW_COLOR "%3ld ", list->nodes[counter].next);
+            printf(YELLOW_COLOR "%10ld ", list->nodes[counter].next);
         else
-            printf(GREEN_COLOR "%3ld ",list->nodes[counter].next);
+            printf(GREEN_COLOR "%10ld ",list->nodes[counter].next);
     }
     printf("\n");
     printf(BOLD_RED_COLOR "PREV ");
     for (size_t counter = 0; counter < list->size + FICT_ELEM; counter++)
     {
         if (counter == 0)
-            printf(RED_COLOR "%3ld ", list->nodes[counter].prev);
+            printf(RED_COLOR "%10ld ", list->nodes[counter].prev);
         else if (list->nodes[counter].prev == -1)
-            printf(YELLOW_COLOR "%3ld ", list->nodes[counter].prev);
+            printf(YELLOW_COLOR "%10ld ", list->nodes[counter].prev);
         else
-            printf(GREEN_COLOR "%3ld ",list->nodes[counter].prev);
+            printf(GREEN_COLOR "%10ld ",list->nodes[counter].prev);
     }
     printf("\n");
     printf(YELLOW_COLOR "______________________________________\n");
@@ -283,17 +287,17 @@ ssize_t ReduceRealloc(Iterator* it)
 
 ssize_t FindErrors(Iterator* it)
 {
-    if (it          == NULL)                           return 1 << 0;
+    if (it          == NULL)                             return 1 << 0;
     
     List* list = it-> list;
 
-    if (list        == NULL)                           return 1 << 1;
-    if (list->nodes == NULL)                           return 1 << 2;
+    if (list        == NULL)                             return 1 << 1;
+    if (list->nodes == NULL)                             return 1 << 2;
 
-    if (it->index > (int) list->size)         list->errors |= 1 << 3;
-    if (list->nodes[it->index].prev == -1)    list->errors |= 1 << 4;
-    if (list->free > (int) list->size)        list->errors |= 1 << 5;
-    if (list->nodes[0].data != POISON)        list->errors |= 1 << 6;
+    if (it->index > (int) list->size)           list->errors |= 1 << 3;
+    if (list->nodes[it->index].prev == -1)      list->errors |= 1 << 4;
+    if (list->free > (int) list->size)          list->errors |= 1 << 5;
+    if (list->nodes[0].data != (char*) POISON)  list->errors |= 1 << 6;
     
     list->errors |= СheckForLooping(list);
     list->errors |= LogicCheck(list);
@@ -426,16 +430,19 @@ ssize_t   End(Iterator* it)
 {
     if (FindErrors(it) != 0)
         return -1;
+    
     // return 0 is OK
+
     return (it->list->nodes[it->list->nodes[0].prev].next);  // always return 0
 }
 
 Elem_t GetValueList(Iterator* it)
 {
     if (FindErrors(it) != 0)
-        return -1;
+        return (char*) POISON;
 
     Elem_t return_value = it->list->nodes[it->index].data;
+
     return return_value;
 }
 
@@ -462,7 +469,7 @@ void FillMemory(List* list, size_t start, size_t end)
 
     for (size_t counter = start; counter < end; counter++) 
     {
-        list->nodes[counter].data = POISON;
+        list->nodes[counter].data = (char*) POISON;
         list->nodes[counter].next = (int) (counter + FICT_ELEM);
         list->nodes[counter].prev = POISON_COUNTER;
     }
@@ -491,9 +498,10 @@ ssize_t Linearization(Iterator* it)
 {
     List* list = it->list;
     
-    int temporaryList[MAX_SIZE_LIST] = {};
+    char* temporaryList[MAX_SIZE_LIST] = {};
     size_t counter      = 0;
     size_t counter_full = 0;
+
     do
     {
         temporaryList[counter_full] = list->nodes[counter].data;
@@ -525,5 +533,6 @@ ssize_t Linearization(Iterator* it)
     FillMemory(list, counter_full, list->size + FICT_ELEM);
 
     list->errors = FindErrors(it);
+
     return list->errors;
 }
