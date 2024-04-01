@@ -4,7 +4,10 @@
 int main()
 {
     Iterator it = {};
-    CtorIterator(&it);
+    List* list = NULL;
+
+    CtorList(&list);
+    it.list = list;
 
     char name_1[] = "aboba";
 
@@ -18,33 +21,33 @@ int main()
     if (ListInsert(&it, name_1) == -1)
     {
         DumpErrors(&it);
-        DtorIterator(&it);
+        DtorList(list);
         return 1;
     } 
 
-    TextDumpList(&it);
+    TextDumpList(list);
 
     if (ListInsert(&it, name_2) == -1)
     {
         DumpErrors(&it);
-        DtorIterator(&it);
+        DtorList(list);
         return 1;
     } 
-    TextDumpList(&it);
+    TextDumpList(list);
     
     
     it.index = Begin(&it); 
    
-    Push_Back(&it, name_3);
-    TextDumpList(&it);
+    Push_Back(list, name_3);
+    TextDumpList(list);
 
-    Push_Front(&it, name_4);
-    TextDumpList(&it);
+    Push_Front(list, name_4);
+    TextDumpList(list);
 
-    Push_Back(&it, name_5);
-    TextDumpList(&it);
+    Push_Back(list, name_5);
+    TextDumpList(list);
 
-    GraphicDumpList(&it);
+    GraphicDumpList(list);
 
-    DtorIterator(&it);
+    DtorList(list);
 }

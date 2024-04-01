@@ -8,38 +8,39 @@ const char* GRAPH_DOT = "Graph.dot";
 const char* GRAPH_JMP = "Graph.ipg";
 
 
-void CtorIterator(Iterator* it)
+
+int CtorList(List** list)
 {
-    assert(it);
+    *list  = (List*) calloc(1, sizeof(List));
+    
+    if (!list)
+        return 1;
 
-    it->index = 0;
-    it->list  = (List*) calloc(1, sizeof(List));
+    (*list)->free     = 1;
+    (*list)->errors   = 0;
+    (*list)->num_elem = 0;
 
-    List* list = it->list;
+    (*list)->size = NUM_NODES;
+    (*list)->nodes = (Node*) calloc((*list)->size + FICT_ELEM, sizeof(Node));
 
-    list->free     = 1;
-    list->errors   = 0;
-    list->num_elem = 0;
+    FillMemory((*list), FICT_ELEM, (*list)->size + FICT_ELEM);
 
-    list->size = NUM_NODES;
-    list->nodes = (Node*) calloc(list->size + FICT_ELEM, sizeof(Node));
+    (*list)->nodes[0].data = (char*) POISON;
+    (*list)->nodes[0].prev = 0;
+    (*list)->nodes[0].next = 0;
 
-    FillMemory(list, FICT_ELEM, list->size + FICT_ELEM);
 
-    list->nodes[0].data = (char*) POISON;
-    list->nodes[0].prev = 0;
-    list->nodes[0].next = 0;
+    return 0;    
 }
 
 
-void DtorIterator(Iterator* it)
+void DtorList(List* list)
 {
-    List* list = it->list; 
     list->free   = POISON;
     list->errors = POISON;
     
-    free(it->list->nodes);
-    free(it->list);
+    free(list->nodes);
+    free(list);
 }
 
 void DtorNodeData(List* list)
@@ -66,8 +67,8 @@ ssize_t ListInsert(Iterator* it, Elem_t value)
     if (FindErrors(it) != 0)
         return -1;
 
-    List*   list     = it ->  list;
-    ssize_t position = it -> index;
+    List*   list     = it->list;
+    ssize_t position = it->index;
     
 #ifdef CHECH_MEMORY
     if (CheckMemory(it) != 0)
@@ -127,10 +128,8 @@ ssize_t ListErase(Iterator* it)
 }
 
 
-void GraphicDumpList(Iterator* it)
+void GraphicDumpList(List* list)
 {
-    List* list = it-> list;
-
     dtBegin(GRAPH_DOT);             // Начало dot-описания графа
 
     CreateGraphicNodes(list);       // Создаем узлы
@@ -201,12 +200,8 @@ void CreateGraphicLinks(List* list)
     }
 }
 
-void TextDumpList(Iterator* it)
+void TextDumpList(List* list)
 {
-    assert(it);
-
-    List* list = it-> list;
-
     printf(GREEN_COLOR  "\nList information about this list\n");
     
     printf(BLUE_COLOR   "Head of list(next[0]) = %3ld.\n"
@@ -270,16 +265,16 @@ ssize_t CheckMemory(Iterator* it)
     List* list = it-> list;
 
     if (list->free == (int) list->size)
-        return IncreaseRealloc(it);
+        return IncreaseRealloc(list);
     else if ((list->num_elem <= list->size / 4) && (list->size > MIN_SIZE_LIST)) 
-        return  ReduceRealloc(it);
+        return  ReduceRealloc(list);
+    
+    it->list->errors = FindErrors(it);
     return 0;
 }
 
-ssize_t IncreaseRealloc(Iterator* it)
+ssize_t IncreaseRealloc(List* list)
 {
-    List* list = it-> list;
-
     list->size *= VALUE_REALLOC;
     Node* new_list = (Node*) realloc(list->nodes, (list->size + FICT_ELEM) * sizeof(Node));
     if (new_list == NULL) {list->errors = 1 << 9; return list->errors;}
@@ -287,17 +282,16 @@ ssize_t IncreaseRealloc(Iterator* it)
         
     FillMemory(list, list->size / VALUE_REALLOC + FICT_ELEM, list->size + FICT_ELEM);
     
-    list->errors = FindErrors(it);
     return list->errors;
 }
 
-ssize_t ReduceRealloc(Iterator* it)
+ssize_t ReduceRealloc(List* list)
 {
-    it->list->size /= VALUE_REALLOC;
+    list->size /= VALUE_REALLOC;
     
-    Linearization(it);
+    Linearization(list);
     
-    return it->list->errors;
+    return list->errors;
 }
 
 ssize_t FindErrors(Iterator* it)
@@ -405,32 +399,40 @@ int DumpErrors(Iterator* it)
 }
 
 
-ssize_t Push_Back(Iterator* it, Elem_t value)
+ssize_t Push_Back(List* list, Elem_t value)
 {
-    it->index = 0;
+    Iterator it = {};
+    it.list = list;
+    it.index = 0;
     
-    return ListInsert(it, value);
+    return ListInsert(&it, value);
 }
 
-ssize_t Push_Front(Iterator* it, Elem_t value)
+ssize_t Push_Front(List* list, Elem_t value)
 {
-    it->index = it->list->nodes[0].next;
+    Iterator it = {};
+    it.list = list;
+    it.index = list->nodes[0].next;
     
-    return ListInsert(it, value);
+    return ListInsert(&it, value);
 }
 
-ssize_t Pop_Back(Iterator* it)
+ssize_t Pop_Back(List* list)
 {
-    it->index = it->list->nodes[0].prev;
+    Iterator it = {};
+    it.list = list;
+    it.index = list->nodes[0].prev;
     
-    return ListErase(it);
+    return ListErase(&it);
 }
 
-ssize_t Pop_Front(Iterator* it)
+ssize_t Pop_Front(List* list)
 {
-    it->index = it->list->nodes[0].next;
+    Iterator it = {};
+    it.list = list;
+    it.index = list->nodes[0].next;
     
-    return ListErase(it);
+    return ListErase(&it);
 }
 
 ssize_t Begin(Iterator* it)
@@ -509,10 +511,8 @@ ssize_t FindElemByValue(Iterator* it, Elem_t value)
     return 0;
 }
 
-ssize_t Linearization(Iterator* it)
+ssize_t Linearization(List* list)
 {
-    List* list = it->list;
-    
     char* temporaryList[MAX_SIZE_LIST] = {};
     size_t counter      = 0;
     size_t counter_full = 0;
@@ -546,8 +546,6 @@ ssize_t Linearization(Iterator* it)
     list->free = (int) counter_full;
 
     FillMemory(list, counter_full, list->size + FICT_ELEM);
-
-    list->errors = FindErrors(it);
 
     return list->errors;
 }

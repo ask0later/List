@@ -40,14 +40,16 @@ struct Iterator
 };
 
 
-void       TextDumpList(Iterator* it);
-void    GraphicDumpList(Iterator* it);
+void         TextDumpList(List* List);
+void    GraphicDumpList(List* list);
 void CreateGraphicNodes(List* list);
 void CreateGraphicLinks(List* list);
 
 
-void     CtorIterator(Iterator* it);
-void     DtorIterator(Iterator* it);
+
+int  CtorList(List** list);
+void DtorList(List* list);
+
 void     DtorNodeData(List* list);
 
 
@@ -62,15 +64,15 @@ ssize_t  СheckForLooping(List* list);
 ssize_t       LogicCheck(List* list);
 
 
-ssize_t  IncreaseRealloc(Iterator* it);
-ssize_t    ReduceRealloc(Iterator* it);
-ssize_t    Linearization(Iterator* it);
+ssize_t  IncreaseRealloc(List* list);
+ssize_t    ReduceRealloc(List* list);
+ssize_t    Linearization(List* list);
 
 
-ssize_t Push_Back (Iterator* it, Elem_t value);
-ssize_t Push_Front(Iterator* it, Elem_t value);
-ssize_t  Pop_Back (Iterator* it);
-ssize_t  Pop_Front(Iterator* it);
+ssize_t Push_Back (List* list, Elem_t value);
+ssize_t Push_Front(List* list, Elem_t value);
+ssize_t  Pop_Back (List* list);
+ssize_t  Pop_Front(List* list);
 
 ssize_t      Begin(Iterator* it);
 ssize_t        End(Iterator* it);
