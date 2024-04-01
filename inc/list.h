@@ -48,6 +48,9 @@ void CreateGraphicLinks(List* list);
 
 void     CtorIterator(Iterator* it);
 void     DtorIterator(Iterator* it);
+void     DtorNodeData(List* list);
+
+
 ssize_t   ListInsert(Iterator* it, Elem_t value);
 ssize_t    ListErase(Iterator* it); 
 

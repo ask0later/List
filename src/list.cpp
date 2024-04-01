@@ -41,6 +41,20 @@ void DtorIterator(Iterator* it)
     free(it->list->nodes);
     free(it->list);
 }
+
+void DtorNodeData(List* list)
+{
+    ssize_t counter = list->nodes[0].next;
+
+    while (counter != 0)
+    {
+        free(list->nodes[counter].data);
+
+        counter = list->nodes[counter].next;
+    }
+
+    return;
+}
  
 ssize_t ListInsert(Iterator* it, Elem_t value)
 {
@@ -79,8 +93,6 @@ ssize_t ListInsert(Iterator* it, Elem_t value)
 
 ssize_t ListErase(Iterator* it)
 {
-    // int index = it.index
-    
     //position - index of element, which need to remove
     // if (position == next[0])  value enter in start
     // if (position == prev[0])  value enter in end
@@ -102,6 +114,7 @@ ssize_t ListErase(Iterator* it)
     list->nodes[list->nodes[position].prev].next = list->nodes[position].next;   // next[prev[position]] = next[position];
     list->nodes[list->nodes[position].next].prev = list->nodes[position].prev;   // prev[next[position]] = prev[position];
 
+    free(list->nodes[position].data);
     list->nodes[position].data =  (char*) POISON;               // data[position] = POISON;
     list->nodes[position].prev =  POISON_COUNTER;               // prev[position] =     -1;
     list->nodes[position].next =      list->free;               // next[position] =   free;
@@ -262,6 +275,7 @@ ssize_t CheckMemory(Iterator* it)
         return  ReduceRealloc(it);
     return 0;
 }
+
 ssize_t IncreaseRealloc(Iterator* it)
 {
     List* list = it-> list;
@@ -276,6 +290,7 @@ ssize_t IncreaseRealloc(Iterator* it)
     list->errors = FindErrors(it);
     return list->errors;
 }
+
 ssize_t ReduceRealloc(Iterator* it)
 {
     it->list->size /= VALUE_REALLOC;

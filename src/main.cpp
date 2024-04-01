@@ -32,12 +32,16 @@ int main()
     } 
     TextDumpList(&it);
     
-    int value = 0;
     
     it.index = Begin(&it); 
    
     Push_Back(&it, name_3);
+    TextDumpList(&it);
 
+    Push_Front(&it, name_4);
+    TextDumpList(&it);
+
+    Push_Back(&it, name_5);
     TextDumpList(&it);
 
     GraphicDumpList(&it);
