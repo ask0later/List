@@ -56,8 +56,8 @@ void DtorNodeData(List* list)
 
     return;
 }
- 
-ssize_t ListInsert(Iterator* it, Elem_t value)
+
+ssize_t ListInsert(List* list, Elem_t value, ssize_t position, Iterator* it)
 {
     // position is index of element, which was after entered value
     // if (position == next[0])  value enter in start
@@ -67,15 +67,13 @@ ssize_t ListInsert(Iterator* it, Elem_t value)
     if (FindErrors(it) != 0)
         return -1;
 
-    List*   list     = it->list;
-    ssize_t position = it->index;
-    
 #ifdef CHECH_MEMORY
     if (CheckMemory(it) != 0)
         return -1;
 #endif
 
     ssize_t position_entered_elem = list->free;
+
     ssize_t free_next = list->nodes[list->free].next;           // free_next = next[free]
 
     list->nodes[list->free].data = value;                       // data[free] = value
@@ -85,14 +83,20 @@ ssize_t ListInsert(Iterator* it, Elem_t value)
     list->nodes[list->nodes[position].prev].next = list->free;  // next[prev[position]] = free
     list->nodes[position].prev = list->free;                    //      prev[position]  = free
 
+
+    it->index = list->free;
+    it->list  = list;
+
     list->free = free_next;                                     // free = free_next
+
+    
 
     list->num_elem++;
     
     return position_entered_elem;
 }
 
-ssize_t ListErase(Iterator* it)
+ssize_t ListErase(List* list, ssize_t position, Iterator* it)
 {
     //position - index of element, which need to remove
     // if (position == next[0])  value enter in start
@@ -102,13 +106,18 @@ ssize_t ListErase(Iterator* it)
     if (FindErrors(it) != 0)
         return -1;
 
-    List* list   = it-> list;
-    ssize_t position = it->index;
+    it->index = list->nodes[position].next;
+    it->list  = list;
 
 #ifdef CHECH_MEMORY
     if (CheckMemory(it) != 0)
         return -1;
 #endif
+
+    it->index = list->nodes[position].next;
+    it->list  = list;
+
+    free(list->nodes[position].data);
 
     ssize_t return_value = list->nodes[position].next;
 
@@ -126,6 +135,143 @@ ssize_t ListErase(Iterator* it)
 
     return return_value;
 }
+
+ssize_t ListPushFront(List* list, Elem_t value, Iterator* it)
+{
+    return ListInsert(list, value, list->nodes[0].next, it);
+}
+
+ssize_t ListPushBack(List* list, Elem_t value, Iterator* it)
+{
+    return ListInsert(list, value, 0, it);
+}
+
+ssize_t ListPopFront(List* list, Iterator* it)
+{
+    return ListErase(list, list->nodes[0].next, it);
+}
+
+
+ssize_t  ListPopBack(List* list, Iterator* it)
+{
+    return ListErase(list, list->nodes[0].prev, it);
+}
+
+Iterator ListBegin(List* list)
+{
+    return Iterator{list, list->nodes[0].next};
+}
+
+Iterator ListEnd(List* list)
+{
+    return Iterator{list, 0};
+}
+
+Iterator Next(Iterator* it)
+{
+    if (FindErrors(it) != 0)
+        return Iterator{it->list, -1};
+
+    return Iterator{it->list, ((it->list)->nodes)[it->index].next};
+}
+
+Iterator Prev(Iterator* it)
+{
+    if (FindErrors(it) != 0)
+        return Iterator{it->list, -1};
+
+    return Iterator{it->list, ((it->list)->nodes)[it->index].prev};
+}
+
+
+Elem_t ListGetElem(Iterator* it)
+{
+    if (FindErrors(it) != 0)
+        return (char*) POISON;
+
+    return it->list->nodes[it->index].data;
+}
+
+ssize_t ListSetElem(Iterator* it, Elem_t value)
+{
+    if (FindErrors(it) != 0)
+        return -1;
+
+    strcpy(it->list->nodes[it->index].data, value);
+    return it->index;
+}
+
+Iterator FindElem(List* list, Elem_t value)
+{
+    Iterator wanted_elem = {list, -1};
+
+    for (Iterator it_1 = ListBegin(list), it_2 = ListEnd(list); it_1.index != it_2.index; it_1 = Next(&it_1))
+    {
+        Elem_t current_value = ListGetElem(&it_1);
+
+        if (strcmp(current_value, value) == 0)
+        {
+            wanted_elem = it_1;
+            break;
+        }
+    }
+
+    return wanted_elem;
+}
+
+void FillMemory(List* list, size_t start, size_t end)
+{
+    assert(list);
+
+    for (size_t counter = start; counter < end; counter++) 
+    {
+        list->nodes[counter].data = (char*) POISON;
+        list->nodes[counter].next = (int) (counter + FICT_ELEM);
+        list->nodes[counter].prev = POISON_COUNTER;
+    }
+}
+
+
+
+ssize_t Linearization(List* list)
+{
+    char* temporaryList[MAX_SIZE_LIST] = {};
+    size_t counter      = 0;
+    size_t counter_full = 0;
+
+    do
+    {
+        temporaryList[counter_full] = list->nodes[counter].data;
+        counter = (size_t) list->nodes[counter].next;
+        counter_full++;
+    } while (counter != 0);
+
+    free(list->nodes);
+
+    Node* new_list = (Node*) calloc(list->size + FICT_ELEM, sizeof(Node)); 
+    if (new_list == NULL) {list->errors = 1 << 9; return list->errors;}
+    list->nodes = new_list;
+
+    for (counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
+    {
+        list->nodes[counter].data = temporaryList[counter];
+
+        if (counter == counter_full - 1)
+            list->nodes[counter].next = 0;
+        else
+            list->nodes[counter].next = (int) (counter + 1);
+        if (counter == 0)
+            list->nodes[counter].prev = (int) (counter_full - 1);
+        else 
+            list->nodes[counter].prev = (int) (counter - 1);
+    }
+    list->free = (int) counter_full;
+
+    FillMemory(list, counter_full, list->size + FICT_ELEM);
+
+    return list->errors;
+}
+
 
 
 void GraphicDumpList(List* list)
@@ -396,156 +542,4 @@ int DumpErrors(Iterator* it)
     }
 
     return (int) list->errors;
-}
-
-
-ssize_t Push_Back(List* list, Elem_t value)
-{
-    Iterator it = {};
-    it.list = list;
-    it.index = 0;
-    
-    return ListInsert(&it, value);
-}
-
-ssize_t Push_Front(List* list, Elem_t value)
-{
-    Iterator it = {};
-    it.list = list;
-    it.index = list->nodes[0].next;
-    
-    return ListInsert(&it, value);
-}
-
-ssize_t Pop_Back(List* list)
-{
-    Iterator it = {};
-    it.list = list;
-    it.index = list->nodes[0].prev;
-    
-    return ListErase(&it);
-}
-
-ssize_t Pop_Front(List* list)
-{
-    Iterator it = {};
-    it.list = list;
-    it.index = list->nodes[0].next;
-    
-    return ListErase(&it);
-}
-
-ssize_t Begin(Iterator* it)
-{
-    if (FindErrors(it) != 0)
-        return -1;
-
-    return (it->list->nodes[0].next);
-}
-
-ssize_t   End(Iterator* it)
-{
-    if (FindErrors(it) != 0)
-        return -1;
-    
-    // return 0 is OK
-
-    return (it->list->nodes[it->list->nodes[0].prev].next);  // always return 0
-}
-
-Elem_t GetValueList(Iterator* it)
-{
-    if (FindErrors(it) != 0)
-        return (char*) POISON;
-
-    Elem_t return_value = it->list->nodes[it->index].data;
-
-    return return_value;
-}
-
-ssize_t SetValueList(Iterator* it, Elem_t value)
-{
-    if (FindErrors(it) != 0)
-        return -1;
-
-    it->list->nodes[it->index].data = value;
-    return it->index;
-}
-
-ssize_t Next(Iterator* it)
-{
-    if (FindErrors(it) != 0)
-        return -1;
-
-    return (it->list->nodes[it->index].next);
-}
-
-void FillMemory(List* list, size_t start, size_t end)
-{
-    assert(list);
-
-    for (size_t counter = start; counter < end; counter++) 
-    {
-        list->nodes[counter].data = (char*) POISON;
-        list->nodes[counter].next = (int) (counter + FICT_ELEM);
-        list->nodes[counter].prev = POISON_COUNTER;
-    }
-}
-
-ssize_t FindElemByValue(Iterator* it, Elem_t value)
-{
-    // if (FindErrors(it) != 0)
-    //     return -1;
-    
-    printf(GREEN_COLOR "                              __ATTENTION__\n"
-           "was used to search for an element by value, which uses, oh my God, a loop\n");
-
-    ssize_t counter      = 0;
-    do
-    {
-        if (it->list->nodes[counter].data == value)
-            return counter;
-        counter = it->list->nodes[counter].next;
-    } while (counter != 0);
-
-    return 0;
-}
-
-ssize_t Linearization(List* list)
-{
-    char* temporaryList[MAX_SIZE_LIST] = {};
-    size_t counter      = 0;
-    size_t counter_full = 0;
-
-    do
-    {
-        temporaryList[counter_full] = list->nodes[counter].data;
-        counter = (size_t) list->nodes[counter].next;
-        counter_full++;
-    } while (counter != 0);
-
-    free(list->nodes);
-
-    Node* new_list = (Node*) calloc(list->size + FICT_ELEM, sizeof(Node)); 
-    if (new_list == NULL) {list->errors = 1 << 9; return list->errors;}
-    list->nodes = new_list;
-
-    for (counter = 0; counter < list->num_elem + FICT_ELEM; counter++)
-    {
-        list->nodes[counter].data = temporaryList[counter];
-
-        if (counter == counter_full - 1)
-            list->nodes[counter].next = 0;
-        else
-            list->nodes[counter].next = (int) (counter + 1);
-        if (counter == 0)
-            list->nodes[counter].prev = (int) (counter_full - 1);
-        else 
-            list->nodes[counter].prev = (int) (counter - 1);
-    }
-    list->free = (int) counter_full;
-
-    FillMemory(list, counter_full, list->size + FICT_ELEM);
-
-    return list->errors;
 }

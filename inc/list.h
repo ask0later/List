@@ -35,7 +35,7 @@ struct List
 
 struct Iterator 
 {
-    List* list = {};
+    List*      list;
     ssize_t   index;
 };
 
@@ -46,17 +46,12 @@ void CreateGraphicNodes(List* list);
 void CreateGraphicLinks(List* list);
 
 
-
 int  CtorList(List** list);
 void DtorList(List* list);
+void DtorNodeData(List* list);
 
-void     DtorNodeData(List* list);
 
-
-ssize_t   ListInsert(Iterator* it, Elem_t value);
-ssize_t    ListErase(Iterator* it); 
-
-int       DumpErrors(Iterator* it);
+int DumpErrors(Iterator* it);
 
 ssize_t       FindErrors(Iterator* it);
 ssize_t      CheckMemory(Iterator* it);
@@ -69,23 +64,26 @@ ssize_t    ReduceRealloc(List* list);
 ssize_t    Linearization(List* list);
 
 
-ssize_t Push_Back (List* list, Elem_t value);
-ssize_t Push_Front(List* list, Elem_t value);
-ssize_t  Pop_Back (List* list);
-ssize_t  Pop_Front(List* list);
-
-ssize_t      Begin(Iterator* it);
-ssize_t        End(Iterator* it);
-ssize_t       Next(Iterator* it);
-
-Elem_t  GetValueList(Iterator* it);
-ssize_t SetValueList(Iterator* it, Elem_t value);
-
-
-ssize_t FindElemByValue(Iterator* it, Elem_t value);
-
 void FillMemory(List* list, size_t start, size_t end);
 
+
+ssize_t   ListInsert(List* list, Elem_t value, ssize_t position, Iterator* it);
+ssize_t    ListErase(List* list, ssize_t position, Iterator* it);
+
+ssize_t ListPushBack(List* list, Elem_t value, Iterator* it);
+ssize_t ListPushFront(List* list, Elem_t value, Iterator* it);
+ssize_t  ListPopBack(List* list, Iterator* it);
+ssize_t  ListPopFront(List* list, Iterator* it);
+
+Iterator  ListBegin(List* list);
+Iterator    ListEnd(List* list);
+Iterator       Next(Iterator* it);
+Iterator       Prev(Iterator* it);
+
+Elem_t  ListGetElem(Iterator* it);
+ssize_t ListSetElem(Iterator* it, Elem_t value);
+
+Iterator FindElem(List* list, Elem_t value);
 
 
 #endif

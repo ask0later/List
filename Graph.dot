@@ -1,0 +1,17 @@
+digraph DotGraph
+{
+rankdir=LR;
+    Node0 [shape="box", color="black", fontcolor="black", fillcolor="#EE204D", style="filled", weight="1", label="INDX =  0\nDATA = ЯД\nNEXT =  2\nPREV =  3"];
+    Node1 [shape="box", color="black", fontcolor="black", fillcolor="#21C912", style="filled", weight="1", label="INDX =  1\nDATA = malina\nNEXT =  3\nPREV =  2"];
+    Node2 [shape="box", color="black", fontcolor="black", fillcolor="#7BF2DA", style="filled", weight="1", label="INDX =  2\nDATA = telephone\nNEXT =  1\nPREV =  0"];
+    Node3 [shape="box", color="black", fontcolor="black", fillcolor="#7BF2DA", style="filled", weight="1", label="INDX =  3\nDATA = blin\nNEXT =  0\nPREV =  1"];
+    Node4 [shape="box", color="black", fontcolor="black", fillcolor="#F8D568", style="filled", weight="1", label="INDX =  4\nDATA = ЯД\nNEXT =  5\nPREV = -1"];
+    Node0 -> Node1 [color="#FFFFFF", style="invis", weight="1", label=""];
+    Node1 -> Node2 [color="#FFFFFF", style="invis", weight="1", label=""];
+    Node2 -> Node3 [color="#FFFFFF", style="invis", weight="1", label=""];
+    Node3 -> Node4 [color="#FFFFFF", style="invis", weight="1", label=""];
+    Node0 -> Node2 [color="#000000", style="bold", weight="1", label=""];
+    Node1 -> Node3 [color="#000000", style="bold", weight="1", label=""];
+    Node2 -> Node1 [color="#000000", style="bold", weight="1", label=""];
+    Node3 -> Node0 [color="#000000", style="bold", weight="1", label=""];
+}
