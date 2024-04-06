@@ -13,17 +13,13 @@ int main()
     char name_4[] = "telephone";
     char name_5[] = "blin";
 
-   
-    TextDumpList(list);
-
     
     ListPushFront(list, name_3, &it);
-    TextDumpList(list);
 
     ListPushFront(list, name_4, &it);
-    TextDumpList(list);
 
     ListPushBack(list, name_5, &it);
+
     TextDumpList(list);
 
     GraphicDumpList(list);
