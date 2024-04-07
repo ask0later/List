@@ -64,11 +64,11 @@ ssize_t ListInsert(List* list, Elem_t value, ssize_t position, Iterator* it)
     // if (prev[position] == -1) error!!!
     // if (position == 0)        value enter in end
 
-    if (FindErrors(it) != 0)
+    if (Verificator(list) != 0)
         return -1;
 
 #ifdef CHECH_MEMORY
-    if (CheckMemory(it) != 0)
+    if (CheckMemory(list) != 0)
         return -1;
 #endif
 
@@ -103,14 +103,14 @@ ssize_t ListErase(List* list, ssize_t position, Iterator* it)
     // if (position == prev[0])  value enter in end
     // if (prev[position] == -1) error!!!
     
-    if (FindErrors(it) != 0)
+    if (Verificator(list) != 0)
         return -1;
 
     it->index = list->nodes[position].next;
     it->list  = list;
 
 #ifdef CHECH_MEMORY
-    if (CheckMemory(it) != 0)
+    if (CheckMemory(list) != 0)
         return -1;
 #endif
 
@@ -159,26 +159,42 @@ ssize_t  ListPopBack(List* list, Iterator* it)
 
 Iterator ListBegin(List* list)
 {
+    list->errors = Verificator(list);
+    if (list->errors != 0)
+    {
+        return Iterator{NULL, -1};
+    }
+
     return Iterator{list, list->nodes[0].next};
 }
 
 Iterator ListEnd(List* list)
 {
+    list->errors = Verificator(list);
+    if (list->errors != 0)
+    {
+        return Iterator{NULL, -1};
+    }
+
     return Iterator{list, 0};
 }
 
 Iterator Next(Iterator* it)
 {
-    if (FindErrors(it) != 0)
-        return Iterator{it->list, -1};
+    if (Verificator(it->list) != 0)
+    {
+        return Iterator{NULL, -1};
+    }
 
     return Iterator{it->list, ((it->list)->nodes)[it->index].next};
 }
 
 Iterator Prev(Iterator* it)
 {
-    if (FindErrors(it) != 0)
-        return Iterator{it->list, -1};
+    if (Verificator(it->list) != 0)
+    {
+        return Iterator{NULL, -1};
+    }
 
     return Iterator{it->list, ((it->list)->nodes)[it->index].prev};
 }
@@ -186,17 +202,11 @@ Iterator Prev(Iterator* it)
 
 Elem_t ListGetElem(Iterator* it)
 {
-    if (FindErrors(it) != 0)
-        return (char*) POISON;
-
     return it->list->nodes[it->index].data;
 }
 
 ssize_t ListSetElem(Iterator* it, Elem_t value)
 {
-    if (FindErrors(it) != 0)
-        return -1;
-
     strcpy(it->list->nodes[it->index].data, value);
     return it->index;
 }
@@ -406,17 +416,16 @@ void TextDumpList(List* list)
     printf(END_COLOR);
 }
 
-ssize_t CheckMemory(Iterator* it)
+ssize_t CheckMemory(List* list)
 {
-    List* list = it-> list;
-
     if (list->free == (int) list->size)
         return IncreaseRealloc(list);
     else if ((list->num_elem <= list->size / 4) && (list->size > MIN_SIZE_LIST)) 
         return  ReduceRealloc(list);
     
-    it->list->errors = FindErrors(it);
-    return 0;
+    list->errors = Verificator(list);
+
+    return list->errors;
 }
 
 ssize_t IncreaseRealloc(List* list)
@@ -440,17 +449,11 @@ ssize_t ReduceRealloc(List* list)
     return list->errors;
 }
 
-ssize_t FindErrors(Iterator* it)
+ssize_t Verificator(List* list)
 {
-    if (it          == NULL)                             return 1 << 0;
-    
-    List* list = it-> list;
+    if (list == NULL)                                    return 1 << 1;
 
-    if (list        == NULL)                             return 1 << 1;
     if (list->nodes == NULL)                             return 1 << 2;
-
-    if (it->index > (int) list->size)           list->errors |= 1 << 3;
-    if (list->nodes[it->index].prev == -1)      list->errors |= 1 << 4;
     if (list->free > (int) list->size)          list->errors |= 1 << 5;
     if (list->nodes[0].data != (char*) POISON)  list->errors |= 1 << 6;
     

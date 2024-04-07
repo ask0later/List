@@ -53,8 +53,8 @@ void DtorNodeData(List* list);
 
 int DumpErrors(Iterator* it);
 
-ssize_t       FindErrors(Iterator* it);
-ssize_t      CheckMemory(Iterator* it);
+ssize_t      Verificator(List* list);
+ssize_t      CheckMemory(List* list);
 ssize_t  СheckForLooping(List* list);
 ssize_t       LogicCheck(List* list);
 
